@@ -1,0 +1,135 @@
+AI Business Plan & Proposal Generator (Website SaaS)
+
+Build a modern SaaS web application called "CareerForge AI" — an AI-powered Resume & Job Application Builder.
+
+Tech Stack:
+- Frontend: Next.js 14 + TypeScript + TailwindCSS
+- Backend: Node.js + Express
+- Database: MongoDB
+- AI Integration: OpenAI API
+- Authentication: JWT-based auth
+- PDF Generation: Use a reliable PDF library
+
+The app must be production-ready, clean, responsive, and modern.
+
+=============================
+CORE FEATURES
+=============================
+
+1. Authentication System
+- Sign up (email + password)
+- Login
+- Forgot password
+- JWT authentication
+- Protected dashboard routes
+
+2. User Dashboard
+- Clean sidebar layout
+- Sections:
+    - Create Resume
+    - Create Cover Letter
+    - Job Match Optimizer
+    - Saved Documents
+    - Account Settings
+
+3. AI Resume Generator
+User inputs:
+- Full name
+- Job title
+- Skills
+- Work experience
+- Education
+- Certifications
+- Target job description (optional)
+
+System:
+- Send structured prompt to OpenAI
+- Generate professional resume
+- Format cleanly
+- Allow editing before export
+
+4. AI Cover Letter Generator
+User inputs:
+- Company name
+- Job role
+- Skills
+- Experience summary
+
+Generate:
+- Personalized cover letter
+- Professional tone
+- Customizable output
+
+5. Resume Optimizer
+User pastes:
+- Existing resume
+- Target job description
+
+AI:
+- Analyzes match
+- Suggests improvements
+- Highlights missing keywords
+
+6. Document Editor
+- Rich text editor
+- Allow user to edit AI result
+- Save to database
+
+7. Export Feature
+- Export as PDF
+- Download DOCX
+- Copy text
+
+8. Saved Documents
+- List previous resumes
+- Edit
+- Delete
+- Duplicate
+
+=============================
+UI REQUIREMENTS
+=============================
+
+- Modern SaaS dashboard
+- Dark/light mode toggle
+- Clean typography
+- Responsive mobile design
+- Smooth animations
+- Professional color scheme (blue + white)
+
+=============================
+BONUS FEATURES
+=============================
+
+- Resume Templates (3 modern styles)
+- AI tone selector (formal, creative, corporate)
+- Word count indicator
+- Subscription-ready structure
+
+=============================
+SECURITY
+=============================
+
+- Validate inputs
+- Secure API routes
+- Rate limiting for AI calls
+
+=============================
+STRUCTURE
+=============================
+
+Organize project clearly:
+- /frontend
+- /backend
+- Clean separation of concerns
+- Environment variables for API keys
+
+Build this step-by-step and explain folder structure.
+
+
+
+I NEED A MODERN, PROFESSIONAL AND UNIQUE, LIVE MOVEMENT, RESPONSIVE UI, ANIMATIONS, MOTION MOVEMENT WEBSITES...
+
+ALSO INSTALL THREE.JS TOO 
+
+before starting work, llist every details about the project
