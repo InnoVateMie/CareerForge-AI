@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
-import { Sparkles, FileText, CheckCircle2, ChevronRight } from "lucide-react";
+import { Sparkles, FileText, CheckCircle2, ChevronRight, Layout } from "lucide-react";
 import { ThreeBackground } from "@/components/ThreeBackground";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { Redirect } from "wouter";
+import React from "react";
 
 export default function Landing() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -80,7 +81,7 @@ export default function Landing() {
             {features.map((feature, i) => (
               <div key={i} className="glass-panel p-8 rounded-2xl text-left hover:-translate-y-2 transition-all duration-300">
                 <div className="h-12 w-12 rounded-xl bg-primary/20 flex items-center justify-center mb-6 text-primary">
-                  {i === 0 ? <FileText className="w-6 h-6" /> : i === 1 ? <Sparkles className="w-6 h-6" /> : <Target className="w-6 h-6" />}
+                  {i === 0 ? <FileText className="w-6 h-6" /> : i === 1 ? <Sparkles className="w-6 h-6" /> : <Layout className="w-6 h-6" />}
                 </div>
                 <h3 className="text-xl font-bold text-white mb-3 font-display">{feature.title}</h3>
                 <p className="text-slate-400 leading-relaxed">{feature.description}</p>
