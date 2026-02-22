@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Sparkles, FileText, CheckCircle2, ChevronRight, Layout } from "lucide-react";
+import { Sparkles, FileText, CheckCircle2, ChevronRight, Layout, Target } from "lucide-react";
 import { ThreeBackground } from "@/components/ThreeBackground";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
