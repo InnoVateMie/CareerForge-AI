@@ -88,12 +88,12 @@ export async function createApp() {
             } else {
                 const { GoogleGenerativeAI } = await import("@google/generative-ai");
                 const genAI = new GoogleGenerativeAI(apiKey);
-                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                const modelName = "gemini-1.5-flash-latest";
+                const model = genAI.getGenerativeModel({ model: modelName });
                 const start = Date.now();
-                // Just a tiny prompt to verify connectivity
                 const result = await model.generateContent("echo test");
                 const text = result.response.text();
-                report.tests.ai = { ok: true, duration: Date.now() - start, echo: !!text };
+                report.tests.ai = { ok: true, duration: Date.now() - start, echo: !!text, model: modelName };
             }
         } catch (err: any) {
             report.tests.ai = { ok: false, error: err.message };
