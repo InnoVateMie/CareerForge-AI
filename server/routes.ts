@@ -150,8 +150,11 @@ export async function registerRoutes(
 
   // AI Generators
   app.post(api.resumes.generate.path, isAuthenticated, async (req, res) => {
+    console.log("[generate] Resume generation requested");
     try {
+      console.log("[generate] Parsing input...");
       const input = api.resumes.generate.input.parse(req.body);
+      console.log("[generate] Input parsed for:", input.fullName);
 
       const prompt = `Generate a professional resume for:
 Name: ${input.fullName}
@@ -164,26 +167,41 @@ ${input.targetJobDescription ? `Target Job Description: ${input.targetJobDescrip
 
 Format the output in clean HTML suitable for a rich text editor. Include standard resume sections: Summary, Experience, Education, Skills. Make it professional and achievement-oriented. Do not include markdown code block backticks.`;
 
+      console.log("[generate] Initializing Gemini models...");
       const { model } = getGenAIModels();
+      console.log("[generate] Gemini model initialized. Calling AI (this may take time)...");
+
       const result = await model.generateContent(prompt);
-      const content = result.response.text();
+      console.log("[generate] AI response received.");
+
+      const response = await result.response;
+      const content = response.text();
+      console.log("[generate] Content length:", content?.length || 0);
 
       res.json({ content: content || "" });
+      console.log("[generate] Success response sent.");
     } catch (err: any) {
-      console.error("RESUME GENERATE FAILED:", err?.message || err);
+      console.error("[generate] RESUME GENERATE FAILED:", err);
       if (err?.message?.includes("404")) {
         return res.status(500).json({
           message: "AI Model Error",
           detail: "The Gemini model 'gemini-1.5-flash' could not be found. Please check if your API key is valid and has access to this model."
         });
       }
-      res.status(500).json({ message: "Failed to generate resume", detail: err?.message });
+      res.status(500).json({
+        message: "Failed to generate resume",
+        detail: err?.message || String(err),
+        stack: process.env.NODE_ENV === "development" ? err?.stack : undefined
+      });
     }
   });
 
   app.post(api.coverLetters.generate.path, isAuthenticated, async (req, res) => {
+    console.log("[generate] Cover letter generation requested");
     try {
+      console.log("[generate] Parsing input...");
       const input = api.coverLetters.generate.input.parse(req.body);
+      console.log("[generate] Input parsed for job role:", input.jobRole);
 
       const prompt = `Generate a professional cover letter for the following context:
 Company Name: ${input.companyName}
@@ -193,13 +211,21 @@ My Experience Summary: ${input.experienceSummary}
 
 Format the output in clean HTML suitable for a rich text editor. Make the tone professional, engaging, and directly connecting my skills to the target role. Do not include markdown code block backticks.`;
 
+      console.log("[generate] Initializing Gemini models...");
       const { model } = getGenAIModels();
+      console.log("[generate] Gemini model initialized. Calling AI...");
+
       const result = await model.generateContent(prompt);
-      const content = result.response.text();
+      console.log("[generate] AI response received.");
+
+      const response = await result.response;
+      const content = response.text();
+      console.log("[generate] Content length:", content?.length || 0);
 
       res.json({ content: content || "" });
+      console.log("[generate] Success response sent.");
     } catch (err: any) {
-      console.error("COVER LETTER GENERATE FAILED:", err);
+      console.error("[generate] COVER LETTER GENERATE FAILED:", err);
       res.status(500).json({
         message: "Failed to generate cover letter",
         detail: err?.message || String(err),
