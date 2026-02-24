@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Bold, Italic, List, ListOrdered, Heading1, Heading2, Quote } from "lucide-react";
@@ -22,6 +23,13 @@ export function RichTextEditor({ content, onChange, editorRef }: RichTextEditorP
       },
     },
   });
+
+  // Sync content if it changes from outside (e.g. after loading)
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content);
+    }
+  }, [content, editor]);
 
   if (!editor) {
     return <div className="h-[500px] flex items-center justify-center border rounded-xl bg-card">Loading editor...</div>;
@@ -101,7 +109,7 @@ export function RichTextEditor({ content, onChange, editorRef }: RichTextEditorP
           <Quote className="h-4 w-4" />
         </Button>
       </div>
-      
+
       <div className="flex-1 bg-background" ref={editorRef}>
         <EditorContent editor={editor} />
       </div>

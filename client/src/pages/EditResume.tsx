@@ -114,11 +114,18 @@ export default function EditResume() {
                 </div>
 
                 <div className="premium-resume-container bg-white rounded-xl shadow-lg border border-border p-8 overflow-hidden">
-                    <RichTextEditor
-                        content={content}
-                        onChange={setContent}
-                        editorRef={resumeEditorRef}
-                    />
+                    {content ? (
+                        <RichTextEditor
+                            content={content}
+                            onChange={setContent}
+                            editorRef={resumeEditorRef}
+                        />
+                    ) : (
+                        <div className="h-[500px] flex items-center justify-center">
+                            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground mr-2" />
+                            Loading content...
+                        </div>
+                    )}
                 </div>
             </div>
         </DashboardLayout>
