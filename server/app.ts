@@ -59,7 +59,7 @@ export async function createApp() {
 
     app.get("/api/debug/full", async (req, res) => {
         const report: any = {
-            version: "DR-005-REST-ULTIMATE", // Tracking ID
+            version: "DR-006-LIST-MODELS", // Listing all IDs
             timestamp: new Date().toISOString(),
             env: {
                 HAS_DB_URL: !!process.env.DATABASE_URL,
@@ -94,7 +94,7 @@ export async function createApp() {
                 report.tests.ai_rest = {
                     ok: response.ok,
                     status: response.status,
-                    has_models: !!(data.models && data.models.length > 0),
+                    available_models: data.models ? data.models.map((m: any) => m.name) : [],
                     raw_error: response.ok ? null : data.error
                 };
             }
