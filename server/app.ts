@@ -59,7 +59,7 @@ export async function createApp() {
 
     app.get("/api/debug/full", async (req, res) => {
         const report: any = {
-            version: "DR-007-FINAL-RESOLVED", // THE END
+            version: "DR-008-QUOTA-FIX", // FINAL PUSH
             timestamp: new Date().toISOString(),
             env: {
                 HAS_DB_URL: !!process.env.DATABASE_URL,
@@ -78,7 +78,7 @@ export async function createApp() {
             report.tests.db = { ok: false, error: err.message };
         }
 
-        // Test AI with the identified working model
+        // Test AI with the identified working model alias
         try {
             const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
             if (!apiKey || apiKey === "missing") {
@@ -86,7 +86,7 @@ export async function createApp() {
             } else {
                 const { GoogleGenerativeAI } = await import("@google/generative-ai");
                 const genAI = new GoogleGenerativeAI(apiKey);
-                const modelName = "gemini-2.0-flash"; // Locked in from DR-006 results
+                const modelName = "gemini-flash-latest"; // Using the alias from your list
                 const model = genAI.getGenerativeModel({ model: modelName });
                 const start = Date.now();
                 const result = await model.generateContent("echo ok");

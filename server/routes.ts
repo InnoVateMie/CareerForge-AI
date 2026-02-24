@@ -16,8 +16,8 @@ const getGenAIModels = () => {
   const genAI = new GoogleGenerativeAI(apiKey);
 
   // Based on your specific account's model list (DR-006), 
-  // gemini-1.5-flash is unavailable but gemini-2.0-flash exists.
-  const modelName = "gemini-2.0-flash";
+  // we'll use gemini-flash-latest to avoid the 429 quota limits on 2.0.
+  const modelName = "gemini-flash-latest";
 
   console.log(`[gemini] Initializing models with: ${modelName}`);
 
