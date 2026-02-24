@@ -152,9 +152,9 @@ Format the output in clean HTML suitable for a rich text editor. Make the tone p
       const content = result.response.text();
 
       res.json({ content: content || "" });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Failed to generate cover letter" });
+    } catch (err: any) {
+      console.error("COVER LETTER GENERATE FAILED:", err?.message || err);
+      res.status(500).json({ message: "Failed to generate cover letter", detail: err?.message });
     }
   });
 
