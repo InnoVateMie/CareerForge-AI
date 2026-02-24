@@ -18,16 +18,15 @@ export async function createApp() {
     // Logging middleware
     app.use((req, res, next) => {
         const start = Date.now();
-        console.log(`${new Date().toLocaleTimeString()} [express] incoming: ${req.method} ${req.url} (path: ${req.path})`);
+        console.log(`[express] incoming: ${req.method} ${req.url} (path: ${req.path}, orig: ${req.originalUrl})`);
         res.on("finish", () => {
             const duration = Date.now() - start;
-            console.log(`${new Date().toLocaleTimeString()} [express] ${req.method} ${req.path} ${res.statusCode} in ${duration}ms`);
+            console.log(`[express] ${req.method} ${req.path} ${res.statusCode} in ${duration}ms`);
         });
         next();
     });
 
     // Netlify Path Normalization Middleware
-    // This handles the case where Netlify calls the function with the full /.netlify/functions/api/ path
     app.use((req, res, next) => {
         const netlifyPrefix = "/.netlify/functions/api";
         if (req.url.startsWith(netlifyPrefix)) {
@@ -35,20 +34,28 @@ export async function createApp() {
             req.url = req.url.replace(netlifyPrefix, "/api");
             if (req.url === "") req.url = "/";
             console.log(`[normalize] ${oldUrl} -> ${req.url}`);
+        } else if (req.path.startsWith("/api/api/")) {
+            // Handle accidental double prefixing
+            req.url = req.url.replace("/api/api/", "/api/");
+            console.log(`[normalize] Double prefix fix: ${req.url}`);
         }
         next();
     });
 
     // Diagnostic route (Root)
-    app.get("/api", (req, res) => {
+    const aliveHandler = (req: Request, res: Response) => {
         res.json({
             status: "alive",
             message: "CareerForge-AI API is running.",
             path: req.path,
             url: req.url,
+            originalUrl: req.originalUrl,
             env: process.env.NODE_ENV
         });
-    });
+    };
+    app.get("/api", aliveHandler);
+    app.get("/api/health", aliveHandler);
+    app.get("/api/", aliveHandler);
 
     app.get("/api/debug/full", async (req, res) => {
         const report: any = {
