@@ -50,6 +50,18 @@ export async function createApp() {
         res.json({ message: "API endpoint base. Try /api/resumes" });
     });
 
+    app.get("/api/debug/db", async (req, res) => {
+        try {
+            console.log("[debug] Testing DB connection...");
+            const { pool } = await import("./db");
+            const result = await pool.query("SELECT NOW()");
+            res.json({ status: "ok", time: result.rows[0].now, env: process.env.NODE_ENV });
+        } catch (err: any) {
+            console.error("[debug] DB test failed:", err.message);
+            res.status(500).json({ status: "error", message: err.message, stack: err.stack });
+        }
+    });
+
     await registerRoutes(app);
 
     // 404 Fallback

@@ -32,16 +32,26 @@ export async function registerRoutes(
 
   // Resumes
   app.get(api.resumes.list.path, isAuthenticated, async (req, res) => {
-    const resumes = await storage.getResumes(getUserId(req));
-    res.json(resumes);
+    try {
+      const resumes = await storage.getResumes(getUserId(req));
+      res.json(resumes);
+    } catch (err: any) {
+      console.error("GET RESUMES FAILED:", err.message);
+      res.status(500).json({ message: "Failed to fetch resumes", detail: err.message });
+    }
   });
 
   app.get(api.resumes.get.path, isAuthenticated, async (req, res) => {
-    const resume = await storage.getResume(Number(req.params.id), getUserId(req));
-    if (!resume) {
-      return res.status(404).json({ message: "Resume not found" });
+    try {
+      const resume = await storage.getResume(Number(req.params.id), getUserId(req));
+      if (!resume) {
+        return res.status(404).json({ message: "Resume not found" });
+      }
+      res.json(resume);
+    } catch (err: any) {
+      console.error("GET RESUME FAILED:", err.message);
+      res.status(500).json({ message: "Failed to fetch resume", detail: err.message });
     }
-    res.json(resume);
   });
 
   app.post(api.resumes.create.path, isAuthenticated, async (req, res) => {
@@ -77,16 +87,26 @@ export async function registerRoutes(
 
   // Cover Letters
   app.get(api.coverLetters.list.path, isAuthenticated, async (req, res) => {
-    const coverLetters = await storage.getCoverLetters(getUserId(req));
-    res.json(coverLetters);
+    try {
+      const coverLetters = await storage.getCoverLetters(getUserId(req));
+      res.json(coverLetters);
+    } catch (err: any) {
+      console.error("GET COVER LETTERS FAILED:", err.message);
+      res.status(500).json({ message: "Failed to fetch cover letters" });
+    }
   });
 
   app.get(api.coverLetters.get.path, isAuthenticated, async (req, res) => {
-    const cl = await storage.getCoverLetter(Number(req.params.id), getUserId(req));
-    if (!cl) {
-      return res.status(404).json({ message: "Cover letter not found" });
+    try {
+      const cl = await storage.getCoverLetter(Number(req.params.id), getUserId(req));
+      if (!cl) {
+        return res.status(404).json({ message: "Cover letter not found" });
+      }
+      res.json(cl);
+    } catch (err: any) {
+      console.error("GET COVER LETTER FAILED:", err.message);
+      res.status(500).json({ message: "Failed to fetch cover letter" });
     }
-    res.json(cl);
   });
 
   app.post(api.coverLetters.create.path, isAuthenticated, async (req, res) => {
