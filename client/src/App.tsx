@@ -14,6 +14,7 @@ import CoverLetters from "./pages/CoverLetters";
 import CreateCoverLetter from "./pages/CreateCoverLetter";
 import JobOptimizer from "./pages/JobOptimizer";
 import InterviewCoach from "./pages/InterviewCoach";
+import EditResume from "./pages/EditResume";
 import NotFound from "./pages/not-found";
 
 function Router() {
@@ -26,6 +27,7 @@ function Router() {
       {/* Resumes */}
       <Route path="/dashboard/resumes" component={Resumes} />
       <Route path="/dashboard/resumes/new" component={CreateResume} />
+      <Route path="/dashboard/resumes/:id" component={EditResume} />
 
       {/* Cover Letters */}
       <Route path="/dashboard/cover-letters" component={CoverLetters} />
