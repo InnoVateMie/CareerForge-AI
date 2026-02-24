@@ -19,7 +19,7 @@ export function RichTextEditor({ content, onChange, editorRef }: RichTextEditorP
     },
     editorProps: {
       attributes: {
-        class: "prose prose-sm md:prose-base dark:prose-invert max-w-none focus:outline-none min-h-[500px] p-8",
+        class: "premium-resume prose prose-sm md:prose-base dark:prose-invert max-w-none focus:outline-none min-h-[500px] p-8",
       },
     },
   });

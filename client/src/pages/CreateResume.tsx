@@ -56,8 +56,12 @@ export default function CreateResume() {
     try {
       setResumeTitle(`${values.fullName} - ${values.jobTitle}`);
       const result = await generateMutation.mutateAsync(values);
-      // Convert markdown to HTML
-      const htmlContent = await marked.parse(result.content);
+      // If AI returned raw HTML (starts with <), use it directly. Otherwise parse as markdown.
+      const rawContent = result.content.trim();
+      const htmlContent = rawContent.startsWith("<") && rawContent.endsWith(">")
+        ? rawContent
+        : await marked.parse(rawContent);
+
       setGeneratedHtml(htmlContent);
       setStep("edit");
       toast({ title: "Resume generated successfully!" });
@@ -237,7 +241,7 @@ export default function CreateResume() {
               />
             </div>
 
-            <div className="premium-resume-container bg-white rounded-xl shadow-lg border border-border p-8 overflow-hidden">
+            <div className="premium-resume-container bg-muted/30 rounded-xl shadow-inner border border-border overflow-hidden">
               <RichTextEditor
                 content={generatedHtml}
                 onChange={setGeneratedHtml}

@@ -176,15 +176,44 @@ CRITICAL INSTRUCTIONS:
 1. Use semantic HTML5 only (Header, Section, Main).
 2. Use specific class names for styling: 
    - Wrap the whole content in <div class="premium-resume">
-   - Name: <h1>
-   - Contact Info: <div class="subtitle">
-   - Sections: <section> with <h2> headers
-   - Experience Items: <div class="exp-item">
-   - Role/Job Title: <div class="exp-header"><span>JOB_TITLE</span><span class="date">DATE_RANGE</span></div>
-   - Company: <div class="company-info">COMPANY_NAME</div>
-   - Use <ul> and <li> for achievements. 
-3. Content Quality: Use the STAR method (Situation, Task, Action, Result) for all work experience bullets. Focus on measurable achievements.
-4. Output raw HTML only. Do NOT include markdown code blocks or backticks.`;
+   - HEADER: Use <header class="resume-header"><h1>NAME</h1><div class="subtitle">JOB TITLE | CONTACT</div></header>
+   - SECTIONS: Use <section> with <h2> headers
+   - SKILLS: Use a <table class="skills-table"> where each row is <tr><td class="category">CATEGORY_NAME</td><td class="items">SKILL1, SKILL2...</td></tr>
+   - EXPERIENCE: Each job must be in an <div class="exp-item">
+     - Job Header: <div class="exp-header"><span>ROLE</span><span class="date">DATE</span></div>
+     - Company Info: <div class="company-info"><span>COMPANY NAME</span><span>LOCATION</span></div>
+     - Accomplishments: Use <ul> and <li> for STAR method achievements.
+3. Content Quality: Focus on high-impact, measurable achievements.
+4. Output raw HTML only. Do NOT include markdown code blocks or backticks.
+
+REQUIRED HTML STRUCTURE:
+<div class="premium-resume">
+  <header class="resume-header">
+    <h1>NAME</h1>
+    <div class="subtitle">JOB TITLE | LOCATION | EMAIL | PHONE</div>
+  </header>
+  
+  <section>
+    <h2>Professional Summary</h2>
+    <p>SUMMARY_TEXT</p>
+  </section>
+
+  <section>
+    <h2>Technical Expertise</h2>
+    <table class="skills-table">
+      <tr><td class="category">Frontend</td><td class="items">React, Next.js, etc.</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>Work Experience</h2>
+    <div class="exp-item">
+      <div class="exp-header"><span>ROLE</span><span class="date">DATE</span></div>
+      <div class="company-info"><span>COMPANY</span><span>LOCATION</span></div>
+      <ul><li>ACHIEVEMENT</li></ul>
+    </div>
+  </section>
+</div>`;
 
       console.log("[generate] Initializing Gemini models...");
       const { model } = getGenAIModels();
