@@ -50,16 +50,49 @@ export async function createApp() {
         });
     });
 
-    app.get("/api/debug/db", async (req, res) => {
+    app.get("/api/debug/full", async (req, res) => {
+        const report: any = {
+            timestamp: new Date().toISOString(),
+            env: {
+                NODE_ENV: process.env.NODE_ENV,
+                HAS_DB_URL: !!process.env.DATABASE_URL,
+                HAS_GEMINI_KEY: !!process.env.GOOGLE_GEMINI_API_KEY,
+                HAS_SUPABASE_URL: !!(process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL),
+                HAS_SERVICE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+            },
+            tests: {}
+        };
+
+        // Test DB
         try {
-            console.log("[debug] Testing DB connection...");
             const { pool } = await import("./db");
-            const result = await pool.query("SELECT NOW()");
-            res.json({ status: "ok", time: result.rows[0].now, env: process.env.NODE_ENV });
+            const start = Date.now();
+            await pool.query("SELECT 1");
+            report.tests.db = { ok: true, duration: Date.now() - start };
         } catch (err: any) {
-            console.error("[debug] DB test failed:", err.message);
-            res.status(500).json({ status: "error", message: err.message, detail: err.message });
+            report.tests.db = { ok: false, error: err.message };
         }
+
+        // Test AI
+        try {
+            const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
+            if (!apiKey || apiKey === "missing") {
+                report.tests.ai = { ok: false, error: "Key missing" };
+            } else {
+                const { GoogleGenerativeAI } = await import("@google/generative-ai");
+                const genAI = new GoogleGenerativeAI(apiKey);
+                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                const start = Date.now();
+                // Just a tiny prompt to verify connectivity
+                const result = await model.generateContent("echo test");
+                const text = result.response.text();
+                report.tests.ai = { ok: true, duration: Date.now() - start, echo: !!text };
+            }
+        } catch (err: any) {
+            report.tests.ai = { ok: false, error: err.message };
+        }
+
+        res.json(report);
     });
 
     // Register all main business routes (they already start with /api)
