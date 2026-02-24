@@ -130,9 +130,9 @@ Format the output in clean HTML suitable for a rich text editor. Include standar
       const content = result.response.text();
 
       res.json({ content: content || "" });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Failed to generate resume" });
+    } catch (err: any) {
+      console.error("RESUME GENERATE FAILED:", err?.message || err);
+      res.status(500).json({ message: "Failed to generate resume", detail: err?.message });
     }
   });
 
