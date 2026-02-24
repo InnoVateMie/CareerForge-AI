@@ -59,14 +59,14 @@ export async function createApp() {
 
     app.get("/api/debug/full", async (req, res) => {
         const report: any = {
-            version: "DR-003-FINAL-SCAN", // Final version for multi-test
+            version: "DR-004-DEEP-API-SCAN", // Version tracking
             timestamp: new Date().toISOString(),
             env: {
-                NODE_ENV: process.env.NODE_ENV,
                 HAS_DB_URL: !!process.env.DATABASE_URL,
                 HAS_GEMINI_KEY: !!process.env.GOOGLE_GEMINI_API_KEY,
-                HAS_SUPABASE_URL: !!(process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL),
-                HAS_SERVICE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+                GEMINI_KEY_PREFIX: process.env.GOOGLE_GEMINI_API_KEY?.substring(0, 4),
+                GEMINI_KEY_LENGTH: process.env.GOOGLE_GEMINI_API_KEY?.length,
+                HAS_SUPABASE: !!(process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL)
             },
             tests: {}
         };
@@ -81,16 +81,7 @@ export async function createApp() {
             report.tests.db = { ok: false, error: err.message };
         }
 
-        // Test AI with fallbacks
-        const modelsToTry = [
-            "gemini-1.5-flash",
-            "gemini-1.5-flash-latest",
-            "models/gemini-1.5-flash",
-            "models/gemini-1.5-flash-latest",
-            "gemini-pro"
-        ];
-        report.tests.ai_summary = "Starting multi-model test...";
-
+        // Test AI with explicit API Versions
         try {
             const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
             if (!apiKey || apiKey === "missing") {
@@ -99,30 +90,28 @@ export async function createApp() {
                 const { GoogleGenerativeAI } = await import("@google/generative-ai");
                 const genAI = new GoogleGenerativeAI(apiKey);
                 const results: any[] = [];
-                let firstSuccess: any = null;
 
-                for (const mName of modelsToTry) {
+                const combinations = [
+                    { model: "gemini-1.5-flash", version: "v1beta" },
+                    { model: "gemini-1.5-flash", version: "v1" },
+                    { model: "gemini-1.5-flash-latest", version: "v1beta" }
+                ];
+
+                for (const combo of combinations) {
                     try {
-                        const model = genAI.getGenerativeModel({ model: mName });
+                        // Pass specific API version to the model options
+                        const model = genAI.getGenerativeModel({ model: combo.model }, { apiVersion: combo.version as any });
                         const start = Date.now();
-                        const result = await model.generateContent("echo ok");
+                        const result = await model.generateContent("test");
                         const text = result.response.text();
-                        const success = { model: mName, ok: true, duration: Date.now() - start, echo: !!text };
-                        results.push(success);
-                        if (!firstSuccess) firstSuccess = success;
+                        results.push({ ...combo, ok: true, duration: Date.now() - start, echo: !!text });
                     } catch (mErr: any) {
-                        results.push({ model: mName, ok: false, error: mErr.message });
+                        results.push({ ...combo, ok: false, error: mErr.message });
                     }
                 }
-
-                report.tests.ai_results = results;
-                if (firstSuccess) {
-                    report.tests.ai = firstSuccess;
-                    report.tests.ai_summary = `Success with ${firstSuccess.model}`;
-                } else {
-                    report.tests.ai = { ok: false, error: "All models failed" };
-                    report.tests.ai_summary = "All 5 tested models returned errors.";
-                }
+                report.tests.ai_detailed = results;
+                const anyOk = results.find(r => r.ok);
+                report.tests.ai = anyOk ? { ok: true, model: anyOk.model, version: anyOk.version } : { ok: false, error: "All versions failed" };
             }
         } catch (err: any) {
             report.tests.ai = { ok: false, error: err.message };
