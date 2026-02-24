@@ -18,6 +18,23 @@ export async function createApp() {
         next();
     });
 
+    // Netlify path rewriting middleware - MUST BE AT THE TOP
+    // Rewrites /.netlify/functions/api/foo to /api/foo
+    app.use((req, res, next) => {
+        const netlifyPrefix = "/.netlify/functions/api";
+        if (req.url.startsWith(netlifyPrefix)) {
+            const oldUrl = req.url;
+            // If it's exactly the prefix, map to /api
+            if (req.url === netlifyPrefix) {
+                req.url = "/api";
+            } else {
+                req.url = req.url.replace(netlifyPrefix, "/api");
+            }
+            console.log(`[rewrite] ${oldUrl} -> ${req.url}`);
+        }
+        next();
+    });
+
     // Diagnostic route
     app.get("/", (req, res) => {
         res.json({
@@ -33,18 +50,16 @@ export async function createApp() {
         res.json({ message: "API endpoint base. Try /api/resumes" });
     });
 
-    // Netlify path rewriting middleware
-    // Rewrites /.netlify/functions/api/foo to /api/foo
-    app.use((req, res, next) => {
-        if (req.url.startsWith("/.netlify/functions/api")) {
-            const oldUrl = req.url;
-            req.url = req.url.replace("/.netlify/functions/api", "/api");
-            console.log(`[rewrite] ${oldUrl} -> ${req.url}`);
-        }
-        next();
-    });
-
     await registerRoutes(app);
+
+    // 404 Fallback
+    app.use((req, res) => {
+        console.warn(`${new Date().toLocaleTimeString()} [express] 404 NOT FOUND: ${req.method} ${req.url}`);
+        res.status(404).json({
+            message: `Route ${req.method} ${req.url} not found`,
+            path: req.path
+        });
+    });
 
     // Global error handler
     app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
