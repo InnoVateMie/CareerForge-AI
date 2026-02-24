@@ -10,12 +10,37 @@ export async function createApp() {
     // Logging middleware
     app.use((req, res, next) => {
         const start = Date.now();
+        console.log(`${new Date().toLocaleTimeString()} [express] incoming: ${req.method} ${req.url} (path: ${req.path})`);
         res.on("finish", () => {
             const duration = Date.now() - start;
-            if (req.path.startsWith("/api")) {
-                console.log(`${new Date().toLocaleTimeString()} [express] ${req.method} ${req.path} ${res.statusCode} in ${duration}ms`);
-            }
+            console.log(`${new Date().toLocaleTimeString()} [express] ${req.method} ${req.path} ${res.statusCode} in ${duration}ms`);
         });
+        next();
+    });
+
+    // Diagnostic route
+    app.get("/", (req, res) => {
+        res.json({
+            status: "alive",
+            message: "CareerForge-AI API is running.",
+            path: req.path,
+            url: req.url,
+            env: process.env.NODE_ENV
+        });
+    });
+
+    app.get("/api", (req, res) => {
+        res.json({ message: "API endpoint base. Try /api/resumes" });
+    });
+
+    // Netlify path rewriting middleware
+    // Rewrites /.netlify/functions/api/foo to /api/foo
+    app.use((req, res, next) => {
+        if (req.url.startsWith("/.netlify/functions/api")) {
+            const oldUrl = req.url;
+            req.url = req.url.replace("/.netlify/functions/api", "/api");
+            console.log(`[rewrite] ${oldUrl} -> ${req.url}`);
+        }
         next();
     });
 
