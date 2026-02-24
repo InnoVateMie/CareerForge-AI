@@ -4,11 +4,13 @@ import * as schema from "../shared/schema";
 
 const { Pool } = pg;
 
-if (!process.env.DATABASE_URL) {
+const connectionString = process.env.DATABASE_URL?.trim();
+
+if (!connectionString) {
   console.warn("DATABASE_URL not set. Database persistence will fail.");
 } else {
   try {
-    const url = new URL(process.env.DATABASE_URL);
+    const url = new URL(connectionString);
     console.log(`[db] Initializing pool - host: ${url.hostname}, user: ${url.username.split('.')[0]}.[REDACTED]`);
   } catch (e) {
     console.warn("[db] Could not parse DATABASE_URL for logging.");
@@ -16,7 +18,7 @@ if (!process.env.DATABASE_URL) {
 }
 
 export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: connectionString,
   ssl: { rejectUnauthorized: false }
 });
 
