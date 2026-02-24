@@ -18,25 +18,11 @@ export async function createApp() {
         next();
     });
 
-    // Netlify path rewriting middleware - MUST BE AT THE TOP
-    // Rewrites /.netlify/functions/api/foo to /api/foo
-    app.use((req, res, next) => {
-        const netlifyPrefix = "/.netlify/functions/api";
-        if (req.url.startsWith(netlifyPrefix)) {
-            const oldUrl = req.url;
-            // If it's exactly the prefix, map to /api
-            if (req.url === netlifyPrefix) {
-                req.url = "/api";
-            } else {
-                req.url = req.url.replace(netlifyPrefix, "/api");
-            }
-            console.log(`[rewrite] ${oldUrl} -> ${req.url}`);
-        }
-        next();
-    });
+    // Create a sub-router for ALL API and diagnostic routes
+    const apiRouter = express.Router();
 
     // Diagnostic route
-    app.get("/", (req, res) => {
+    apiRouter.get("/", (req, res) => {
         res.json({
             status: "alive",
             message: "CareerForge-AI API is running.",
@@ -46,11 +32,7 @@ export async function createApp() {
         });
     });
 
-    app.get("/api", (req, res) => {
-        res.json({ message: "API endpoint base. Try /api/resumes" });
-    });
-
-    app.get("/api/debug/db", async (req, res) => {
+    apiRouter.get("/debug/db", async (req, res) => {
         try {
             console.log("[debug] Testing DB connection...");
             const { pool } = await import("./db");
@@ -58,18 +40,25 @@ export async function createApp() {
             res.json({ status: "ok", time: result.rows[0].now, env: process.env.NODE_ENV });
         } catch (err: any) {
             console.error("[debug] DB test failed:", err.message);
-            res.status(500).json({ status: "error", message: err.message, stack: err.stack });
+            res.status(500).json({ status: "error", message: err.message, detail: err.message });
         }
     });
 
-    await registerRoutes(app);
+    // Register all main business routes on the sub-router
+    await registerRoutes(apiRouter as any);
 
-    // 404 Fallback
+    // Mount the sub-router on BOTH potential base paths
+    // This is the "Once and For All" fix for Netlify routing
+    app.use("/api", apiRouter);
+    app.use("/.netlify/functions/api", apiRouter);
+
+    // 404 Fallback - MUST come after all routes
     app.use((req, res) => {
         console.warn(`${new Date().toLocaleTimeString()} [express] 404 NOT FOUND: ${req.method} ${req.url}`);
         res.status(404).json({
             message: `Route ${req.method} ${req.url} not found`,
-            path: req.path
+            path: req.path,
+            suggestion: "If this is an API call, it should start with /api"
         });
     });
 
