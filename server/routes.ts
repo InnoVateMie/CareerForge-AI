@@ -36,8 +36,12 @@ export async function registerRoutes(
       const resumes = await storage.getResumes(getUserId(req));
       res.json(resumes);
     } catch (err: any) {
-      console.error("GET RESUMES FAILED:", err.message);
-      res.status(500).json({ message: "Failed to fetch resumes", detail: err.message });
+      console.error("GET RESUMES FAILED:", err);
+      res.status(500).json({
+        message: "Failed to fetch resumes",
+        detail: err.message,
+        code: err.code // Likely PG error code
+      });
     }
   });
 
@@ -91,8 +95,12 @@ export async function registerRoutes(
       const coverLetters = await storage.getCoverLetters(getUserId(req));
       res.json(coverLetters);
     } catch (err: any) {
-      console.error("GET COVER LETTERS FAILED:", err.message);
-      res.status(500).json({ message: "Failed to fetch cover letters" });
+      console.error("GET COVER LETTERS FAILED:", err);
+      res.status(500).json({
+        message: "Failed to fetch cover letters",
+        detail: err.message,
+        code: err.code
+      });
     }
   });
 
