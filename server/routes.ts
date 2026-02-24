@@ -15,9 +15,9 @@ const getGenAIModels = () => {
 
   const genAI = new GoogleGenerativeAI(apiKey);
 
-  // Choose a model name based on what's commonly available across accounts/regions
-  // Starting with gemini-1.5-flash-latest as it often resolves 404s in v1beta contexts
-  const modelName = "gemini-1.5-flash-latest";
+  // Based on your specific account's model list (DR-006), 
+  // gemini-1.5-flash is unavailable but gemini-2.0-flash exists.
+  const modelName = "gemini-2.0-flash";
 
   console.log(`[gemini] Initializing models with: ${modelName}`);
 

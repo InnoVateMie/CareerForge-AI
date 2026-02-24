@@ -59,13 +59,11 @@ export async function createApp() {
 
     app.get("/api/debug/full", async (req, res) => {
         const report: any = {
-            version: "DR-006-LIST-MODELS", // Listing all IDs
+            version: "DR-007-FINAL-RESOLVED", // THE END
             timestamp: new Date().toISOString(),
             env: {
                 HAS_DB_URL: !!process.env.DATABASE_URL,
-                HAS_GEMINI_KEY: !!process.env.GOOGLE_GEMINI_API_KEY,
-                GEMINI_KEY_PREFIX: process.env.GOOGLE_GEMINI_API_KEY?.substring(0, 4),
-                KEY_LENGTH: process.env.GOOGLE_GEMINI_API_KEY?.length
+                HAS_GEMINI_KEY: !!process.env.GOOGLE_GEMINI_API_KEY
             },
             tests: {}
         };
@@ -80,26 +78,23 @@ export async function createApp() {
             report.tests.db = { ok: false, error: err.message };
         }
 
-        // Test AI with Raw REST (The Ultimate Proof)
+        // Test AI with the identified working model
         try {
             const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
             if (!apiKey || apiKey === "missing") {
-                report.tests.ai_rest = { ok: false, error: "Key missing" };
+                report.tests.ai = { ok: false, error: "Key missing" };
             } else {
-                const restUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+                const { GoogleGenerativeAI } = await import("@google/generative-ai");
+                const genAI = new GoogleGenerativeAI(apiKey);
+                const modelName = "gemini-2.0-flash"; // Locked in from DR-006 results
+                const model = genAI.getGenerativeModel({ model: modelName });
                 const start = Date.now();
-                const response = await fetch(restUrl);
-                const data: any = await response.json();
-
-                report.tests.ai_rest = {
-                    ok: response.ok,
-                    status: response.status,
-                    available_models: data.models ? data.models.map((m: any) => m.name) : [],
-                    raw_error: response.ok ? null : data.error
-                };
+                const result = await model.generateContent("echo ok");
+                const text = result.response.text();
+                report.tests.ai = { ok: true, duration: Date.now() - start, echo: !!text, model: modelName };
             }
         } catch (err: any) {
-            report.tests.ai_rest = { ok: false, error: err.message };
+            report.tests.ai = { ok: false, error: err.message };
         }
 
         res.json(report);
