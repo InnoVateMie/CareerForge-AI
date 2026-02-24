@@ -59,14 +59,13 @@ export async function createApp() {
 
     app.get("/api/debug/full", async (req, res) => {
         const report: any = {
-            version: "DR-004-DEEP-API-SCAN", // Version tracking
+            version: "DR-005-REST-ULTIMATE", // Tracking ID
             timestamp: new Date().toISOString(),
             env: {
                 HAS_DB_URL: !!process.env.DATABASE_URL,
                 HAS_GEMINI_KEY: !!process.env.GOOGLE_GEMINI_API_KEY,
                 GEMINI_KEY_PREFIX: process.env.GOOGLE_GEMINI_API_KEY?.substring(0, 4),
-                GEMINI_KEY_LENGTH: process.env.GOOGLE_GEMINI_API_KEY?.length,
-                HAS_SUPABASE: !!(process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL)
+                KEY_LENGTH: process.env.GOOGLE_GEMINI_API_KEY?.length
             },
             tests: {}
         };
@@ -81,40 +80,26 @@ export async function createApp() {
             report.tests.db = { ok: false, error: err.message };
         }
 
-        // Test AI with explicit API Versions
+        // Test AI with Raw REST (The Ultimate Proof)
         try {
             const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
             if (!apiKey || apiKey === "missing") {
-                report.tests.ai = { ok: false, error: "Key missing" };
+                report.tests.ai_rest = { ok: false, error: "Key missing" };
             } else {
-                const { GoogleGenerativeAI } = await import("@google/generative-ai");
-                const genAI = new GoogleGenerativeAI(apiKey);
-                const results: any[] = [];
+                const restUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+                const start = Date.now();
+                const response = await fetch(restUrl);
+                const data: any = await response.json();
 
-                const combinations = [
-                    { model: "gemini-1.5-flash", version: "v1beta" },
-                    { model: "gemini-1.5-flash", version: "v1" },
-                    { model: "gemini-1.5-flash-latest", version: "v1beta" }
-                ];
-
-                for (const combo of combinations) {
-                    try {
-                        // Pass specific API version to the model options
-                        const model = genAI.getGenerativeModel({ model: combo.model }, { apiVersion: combo.version as any });
-                        const start = Date.now();
-                        const result = await model.generateContent("test");
-                        const text = result.response.text();
-                        results.push({ ...combo, ok: true, duration: Date.now() - start, echo: !!text });
-                    } catch (mErr: any) {
-                        results.push({ ...combo, ok: false, error: mErr.message });
-                    }
-                }
-                report.tests.ai_detailed = results;
-                const anyOk = results.find(r => r.ok);
-                report.tests.ai = anyOk ? { ok: true, model: anyOk.model, version: anyOk.version } : { ok: false, error: "All versions failed" };
+                report.tests.ai_rest = {
+                    ok: response.ok,
+                    status: response.status,
+                    has_models: !!(data.models && data.models.length > 0),
+                    raw_error: response.ok ? null : data.error
+                };
             }
         } catch (err: any) {
-            report.tests.ai = { ok: false, error: err.message };
+            report.tests.ai_rest = { ok: false, error: err.message };
         }
 
         res.json(report);
