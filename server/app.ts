@@ -59,7 +59,7 @@ export async function createApp() {
 
     app.get("/api/debug/full", async (req, res) => {
         const report: any = {
-            version: "DR-001-FLASH-LATEST-FIX", // Unique ID to track if deploy updated
+            version: "DR-002-MULTI-MODEL-TEST", // Updated for multi-model test
             timestamp: new Date().toISOString(),
             env: {
                 NODE_ENV: process.env.NODE_ENV,
@@ -81,9 +81,16 @@ export async function createApp() {
             report.tests.db = { ok: false, error: err.message };
         }
 
-        // Test AI
-        const modelName = "gemini-1.5-flash-latest";
-        report.tests.ai_tried = modelName;
+        // Test AI with fallbacks
+        const modelsToTry = [
+            "gemini-1.5-flash",
+            "gemini-1.5-flash-latest",
+            "gemini-1.5-flash-001",
+            "gemini-1.5-flash-002",
+            "gemini-1.0-pro"
+        ];
+        report.tests.ai_summary = "Starting multi-model test...";
+
         try {
             const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
             if (!apiKey || apiKey === "missing") {
@@ -91,14 +98,34 @@ export async function createApp() {
             } else {
                 const { GoogleGenerativeAI } = await import("@google/generative-ai");
                 const genAI = new GoogleGenerativeAI(apiKey);
-                const model = genAI.getGenerativeModel({ model: modelName });
-                const start = Date.now();
-                const result = await model.generateContent("echo test");
-                const text = result.response.text();
-                report.tests.ai = { ok: true, duration: Date.now() - start, echo: !!text, model: modelName };
+                const results: any[] = [];
+                let firstSuccess: any = null;
+
+                for (const mName of modelsToTry) {
+                    try {
+                        const model = genAI.getGenerativeModel({ model: mName });
+                        const start = Date.now();
+                        const result = await model.generateContent("echo ok");
+                        const text = result.response.text();
+                        const success = { model: mName, ok: true, duration: Date.now() - start, echo: !!text };
+                        results.push(success);
+                        if (!firstSuccess) firstSuccess = success;
+                    } catch (mErr: any) {
+                        results.push({ model: mName, ok: false, error: mErr.message });
+                    }
+                }
+
+                report.tests.ai_results = results;
+                if (firstSuccess) {
+                    report.tests.ai = firstSuccess;
+                    report.tests.ai_summary = `Success with ${firstSuccess.model}`;
+                } else {
+                    report.tests.ai = { ok: false, error: "All models failed" };
+                    report.tests.ai_summary = "All 5 tested models returned errors.";
+                }
             }
         } catch (err: any) {
-            report.tests.ai = { ok: false, error: err.message, model_used: modelName };
+            report.tests.ai = { ok: false, error: err.message };
         }
 
         res.json(report);
