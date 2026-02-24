@@ -1,8 +1,16 @@
 import express, { type Request, Response, NextFunction } from "express";
+import cors from "cors";
 import { registerRoutes } from "./routes";
 
 export async function createApp() {
     const app = express();
+
+    app.use(cors({
+        origin: true, // Allow all origins for simplicity in troubleshooting
+        credentials: true,
+        allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    }));
 
     app.use(express.json());
     app.use(express.urlencoded({ extended: false }));

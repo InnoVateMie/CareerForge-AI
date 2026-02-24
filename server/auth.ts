@@ -12,7 +12,12 @@ export const isAuthenticated = async (req: Request, res: Response, next: NextFun
 
     // Log request details for debugging 401s
     console.log(`[auth] Request: ${req.method} ${req.url}`);
-    console.log(`[auth] Headers keys:`, Object.keys(req.headers));
+    console.log(`[auth] Headers keys: ${Object.keys(req.headers).join(", ")}`);
+    if (req.headers.authorization) {
+        console.log(`[auth] Authorization header present (starts with: ${req.headers.authorization.substring(0, 15)}...)`);
+    } else {
+        console.log(`[auth] Authorization header MISSING`);
+    }
 
     if (!supabaseUrl || !serviceKey) {
         console.error("[auth] MISSING env vars - url:", !!supabaseUrl, "key:", !!serviceKey);

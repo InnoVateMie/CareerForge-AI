@@ -6,14 +6,17 @@ import { supabase } from "./supabase";
  */
 export async function apiFetch(url: string, options: RequestInit = {}) {
     const { data: { session } } = await supabase.auth.getSession();
-    console.log(`[apiFetch] Request to ${url}, session present: ${!!session}, token present: ${!!session?.access_token}`);
+    const token = session?.access_token;
+
+    console.log(`[apiFetch] Calling ${url}. Session: ${!!session}, Token length: ${token?.length || 0}`);
 
     const headers = new Headers(options.headers || {});
 
-    if (session?.access_token) {
-        headers.set("Authorization", `Bearer ${session.access_token}`);
+    if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+        console.log(`[apiFetch] Set Authorization header for ${url}`);
     } else {
-        console.warn(`[apiFetch] No access token found for request to ${url}`);
+        console.warn(`[apiFetch] MISSING TOKEN for ${url}. User might not be signed in or session expired.`);
     }
 
     // Default to JSON content type for POST/PUT if not set
