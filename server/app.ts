@@ -18,11 +18,21 @@ export async function createApp() {
         next();
     });
 
-    // Create a sub-router for ALL API and diagnostic routes
-    const apiRouter = express.Router();
+    // Netlify Path Normalization Middleware
+    // This handles the case where Netlify calls the function with the full /.netlify/functions/api/ path
+    app.use((req, res, next) => {
+        const netlifyPrefix = "/.netlify/functions/api";
+        if (req.url.startsWith(netlifyPrefix)) {
+            const oldUrl = req.url;
+            req.url = req.url.replace(netlifyPrefix, "/api");
+            if (req.url === "") req.url = "/";
+            console.log(`[normalize] ${oldUrl} -> ${req.url}`);
+        }
+        next();
+    });
 
-    // Diagnostic route
-    apiRouter.get("/", (req, res) => {
+    // Diagnostic route (Root)
+    app.get("/api", (req, res) => {
         res.json({
             status: "alive",
             message: "CareerForge-AI API is running.",
@@ -32,7 +42,7 @@ export async function createApp() {
         });
     });
 
-    apiRouter.get("/debug/db", async (req, res) => {
+    app.get("/api/debug/db", async (req, res) => {
         try {
             console.log("[debug] Testing DB connection...");
             const { pool } = await import("./db");
@@ -44,13 +54,8 @@ export async function createApp() {
         }
     });
 
-    // Register all main business routes on the sub-router
-    await registerRoutes(apiRouter as any);
-
-    // Mount the sub-router on BOTH potential base paths
-    // This is the "Once and For All" fix for Netlify routing
-    app.use("/api", apiRouter);
-    app.use("/.netlify/functions/api", apiRouter);
+    // Register all main business routes (they already start with /api)
+    await registerRoutes(app);
 
     // 404 Fallback - MUST come after all routes
     app.use((req, res) => {
