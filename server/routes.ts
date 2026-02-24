@@ -4,15 +4,13 @@ import { storage } from "./storage";
 import { api } from "../shared/routes";
 import { z } from "zod";
 import { isAuthenticated } from "./auth";
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-if (!process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
-  console.warn("AI_INTEGRATIONS_OPENAI_API_KEY is missing. AI generation features will fail.");
-}
-
-const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY || "missing",
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || "https://api.openai.com/v1",
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY || "missing");
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const jsonModel = genAI.getGenerativeModel({
+  model: "gemini-1.5-flash",
+  generationConfig: { responseMimeType: "application/json" }
 });
 
 export async function registerRoutes(
@@ -128,12 +126,10 @@ ${input.targetJobDescription ? `Target Job Description: ${input.targetJobDescrip
 
 Format the output in clean HTML suitable for a rich text editor. Include standard resume sections: Summary, Experience, Education, Skills. Make it professional and achievement-oriented. Do not include markdown code block backticks.`;
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [{ role: "user", content: prompt }],
-      });
+      const result = await model.generateContent(prompt);
+      const content = result.response.text();
 
-      res.json({ content: response.choices[0].message.content || "" });
+      res.json({ content: content || "" });
     } catch (err) {
       console.error(err);
       res.status(500).json({ message: "Failed to generate resume" });
@@ -152,12 +148,10 @@ My Experience Summary: ${input.experienceSummary}
 
 Format the output in clean HTML suitable for a rich text editor. Make the tone professional, engaging, and directly connecting my skills to the target role. Do not include markdown code block backticks.`;
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [{ role: "user", content: prompt }],
-      });
+      const result = await model.generateContent(prompt);
+      const content = result.response.text();
 
-      res.json({ content: response.choices[0].message.content || "" });
+      res.json({ content: content || "" });
     } catch (err) {
       console.error(err);
       res.status(500).json({ message: "Failed to generate cover letter" });
@@ -182,14 +176,10 @@ Provide your response in JSON format exactly like this:
   "suggestions": "A bulleted list in HTML of actionable suggestions to improve the resume."
 }`;
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        response_format: { type: "json_object" },
-        messages: [{ role: "user", content: prompt }],
-      });
-
-      const result = JSON.parse(response.choices[0].message.content || '{"analysis": "", "suggestions": ""}');
-      res.json(result);
+      const result = await jsonModel.generateContent(prompt);
+      const content = result.response.text();
+      const parsedResult = JSON.parse(content || '{"analysis": "", "suggestions": ""}');
+      res.json(parsedResult);
     } catch (err) {
       console.error(err);
       res.status(500).json({ message: "Failed to optimize resume" });
@@ -216,14 +206,10 @@ Provide your response in JSON format exactly like this:
       
       If you cannot access the URL directly, use your knowledge of typical postings from this domain or provide a generic but high-quality template for a role likely found at that URL.`;
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        response_format: { type: "json_object" },
-        messages: [{ role: "user", content: prompt }],
-      });
-
-      const result = JSON.parse(response.choices[0].message.content || '{"jobTitle": "", "companyName": "", "requirements": "", "description": ""}');
-      res.json(result);
+      const result = await jsonModel.generateContent(prompt);
+      const content = result.response.text();
+      const parsedResult = JSON.parse(content || '{"jobTitle": "", "companyName": "", "requirements": "", "description": ""}');
+      res.json(parsedResult);
     } catch (err) {
       console.error(err);
       res.status(500).json({ message: "Failed to fetch job details" });
@@ -247,14 +233,10 @@ Provide your response in JSON format exactly like this:
         ]
       }`;
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        response_format: { type: "json_object" },
-        messages: [{ role: "user", content: prompt }],
-      });
-
-      const result = JSON.parse(response.choices[0].message.content || '{"questions": []}');
-      res.json(result);
+      const result = await jsonModel.generateContent(prompt);
+      const content = result.response.text();
+      const parsedResult = JSON.parse(content || '{"questions": []}');
+      res.json(parsedResult);
     } catch (err) {
       console.error(err);
       res.status(500).json({ message: "Failed to generate questions" });
@@ -280,14 +262,10 @@ Provide your response in JSON format exactly like this:
         "improvedAnswer": "..."
       }`;
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        response_format: { type: "json_object" },
-        messages: [{ role: "user", content: prompt }],
-      });
-
-      const result = JSON.parse(response.choices[0].message.content || '{"feedback": "", "score": 0, "improvedAnswer": ""}');
-      res.json(result);
+      const result = await jsonModel.generateContent(prompt);
+      const content = result.response.text();
+      const parsedResult = JSON.parse(content || '{"feedback": "", "score": 0, "improvedAnswer": ""}');
+      res.json(parsedResult);
     } catch (err) {
       console.error(err);
       res.status(500).json({ message: "Failed to evaluate answer" });

@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "tsx server/index.ts",
     "build": "tsx script/build.ts",
@@ -11,6 +14,7 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^3.10.0",
     "@jridgewell/trace-mapping": "^0.3.25",
     "@radix-ui/react-accordion": "^1.2.4",
@@ -67,7 +71,6 @@
     "memoizee": "^0.4.17",
     "nanoid": "^5.1.6",
     "next-themes": "^0.4.6",
-    "openai": "^6.22.0",
     "p-limit": "^7.3.0",
     "p-retry": "^7.1.1",
     "pg": "^8.16.3",

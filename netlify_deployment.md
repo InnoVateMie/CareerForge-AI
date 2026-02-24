@@ -3,7 +3,11 @@
 This guide will take you from your local code to a live, working website. Follow these steps exactly.
 
 ## Phase 1: Uploading your code to GitHub 💻
+> [!WARNING]
+> **NEVER commit your `.env` files.** I have already updated your `.gitignore` to prevent this. Git will now automatically skip these files during uploads to keep your passwords safe.
+
 If your code is not already on GitHub, do this first:
+...
 1. Go to [GitHub.com](https://github.com) and create a **New Repository**. Name it `CareerForge-AI`.
 2. Open your terminal in VS Code and run these commands:
    ```bash
@@ -27,19 +31,25 @@ If your code is not already on GitHub, do this first:
 
 ---
 
-## Phase 3: Setting the "Secret" Keys 🔑
-This is the most important step. Without these, AI and Database will not work.
-1. In the Netlify setup screen, look for the **"Environment Variables"** section (or click **Site Settings > Environment Variables** after deployment).
-2. Click **"Add a variable"** and add these 6 keys one by one:
-
-| Key Name | Where to find it? |
+| Key Name | Value (Copy exactly) | 
 | :--- | :--- |
-| **`DATABASE_URL`** | Supabase > Settings > Database > Connection String (URI). *Use the one with your password!* |
-| **`VITE_SUPABASE_URL`** | Supabase > Settings > API > Project URL. |
-| **`VITE_SUPABASE_ANON_KEY`** | Supabase > Settings > API > `anon` `public` key. |
-| **`SUPABASE_SERVICE_ROLE_KEY`** | Supabase > Settings > API > `service_role` `secret` key. **(DO NOT share this!)** |
-| **`AI_INTEGRATIONS_OPENAI_API_KEY`** | [OpenAI Dashboard](https://platform.openai.com/api-keys) > Create new secret key. |
-| **`AI_INTEGRATIONS_OPENAI_BASE_URL`** | Set this to: `https://api.openai.com/v1` |
+| **`DATABASE_URL`** | `postgresql://postgres:[PASSWORD]@db.yomzvwcckrfgpnbwokng.supabase.co:5432/postgres` |
+| **`VITE_SUPABASE_URL`** | `https://yomzvwcckrfgpnbwokng.supabase.co` |
+| **`VITE_SUPABASE_ANON_KEY`** | `[Your Supabase Anon Key]` |
+| **`SUPABASE_SERVICE_ROLE_KEY`** | `[Your Supabase Service Role Key]` |
+| **`GOOGLE_GEMINI_API_KEY`** | `[Your Google Gemini API Key]` |
+
+> [!IMPORTANT]
+> For `DATABASE_URL`, ensure there are no brackets around your password. I have removed them in the table above for you.
+
+---
+
+## 🔑 How to get your FREE Gemini API Key
+See the full guide here: **[gemini_setup.md](file:///c:/Users/HP/AI-Business-Proposal/gemini_setup.md)**
+
+1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey).
+2. Click **"Create API key"**.
+3. Copy the key and paste it into the **`GOOGLE_GEMINI_API_KEY`** variable in Netlify.
 
 ---
 
@@ -58,7 +68,7 @@ Finally, click the big **"Deploy CareerForge-AI"** button!
 2. **If "Generate" fails**:
    - Go to Netlify Dashboard > **Logs** > **Functions**.
    - Click on the `api` function. 
-   - Look for red error messages. Usually, it's a missing or expired OpenAI key.
+   - Look for red error messages. Usually, it's a missing or invalid `GOOGLE_GEMINI_API_KEY`.
 3. **If Auth fails**:
    - Go to Supabase Dashboard > Authentication > URL Configuration.
    - Ensure the **Site URL** is updated to your new Netlify link (e.g., `https://careerforge-ai.netlify.app`).
