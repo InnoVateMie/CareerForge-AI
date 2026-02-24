@@ -6,12 +6,22 @@ import { z } from "zod";
 import { isAuthenticated } from "./auth";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY || "missing");
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-const jsonModel = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash",
-  generationConfig: { responseMimeType: "application/json" }
-});
+const getGenAIModels = () => {
+  const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
+  if (!apiKey || apiKey === "missing") {
+    console.error("[gemini] GOOGLE_GEMINI_API_KEY is missing or invalid.");
+    throw new Error("Gemini API key is not configured. Please add GOOGLE_GEMINI_API_KEY to your environment variables.");
+  }
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  return {
+    model: genAI.getGenerativeModel({ model: "gemini-1.5-flash" }),
+    jsonModel: genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      generationConfig: { responseMimeType: "application/json" }
+    })
+  };
+};
 
 export async function registerRoutes(
   app: Express
@@ -126,12 +136,19 @@ ${input.targetJobDescription ? `Target Job Description: ${input.targetJobDescrip
 
 Format the output in clean HTML suitable for a rich text editor. Include standard resume sections: Summary, Experience, Education, Skills. Make it professional and achievement-oriented. Do not include markdown code block backticks.`;
 
+      const { model } = getGenAIModels();
       const result = await model.generateContent(prompt);
       const content = result.response.text();
 
       res.json({ content: content || "" });
     } catch (err: any) {
       console.error("RESUME GENERATE FAILED:", err?.message || err);
+      if (err?.message?.includes("404")) {
+        return res.status(500).json({
+          message: "AI Model Error",
+          detail: "The Gemini model 'gemini-1.5-flash' could not be found. Please check if your API key is valid and has access to this model."
+        });
+      }
       res.status(500).json({ message: "Failed to generate resume", detail: err?.message });
     }
   });
@@ -148,6 +165,7 @@ My Experience Summary: ${input.experienceSummary}
 
 Format the output in clean HTML suitable for a rich text editor. Make the tone professional, engaging, and directly connecting my skills to the target role. Do not include markdown code block backticks.`;
 
+      const { model } = getGenAIModels();
       const result = await model.generateContent(prompt);
       const content = result.response.text();
 
@@ -176,6 +194,7 @@ Provide your response in JSON format exactly like this:
   "suggestions": "A bulleted list in HTML of actionable suggestions to improve the resume."
 }`;
 
+      const { jsonModel } = getGenAIModels();
       const result = await jsonModel.generateContent(prompt);
       const content = result.response.text();
       const parsedResult = JSON.parse(content || '{"analysis": "", "suggestions": ""}');
@@ -206,6 +225,7 @@ Provide your response in JSON format exactly like this:
       
       If you cannot access the URL directly, use your knowledge of typical postings from this domain or provide a generic but high-quality template for a role likely found at that URL.`;
 
+      const { jsonModel } = getGenAIModels();
       const result = await jsonModel.generateContent(prompt);
       const content = result.response.text();
       const parsedResult = JSON.parse(content || '{"jobTitle": "", "companyName": "", "requirements": "", "description": ""}');
@@ -233,6 +253,7 @@ Provide your response in JSON format exactly like this:
         ]
       }`;
 
+      const { jsonModel } = getGenAIModels();
       const result = await jsonModel.generateContent(prompt);
       const content = result.response.text();
       const parsedResult = JSON.parse(content || '{"questions": []}');
@@ -262,6 +283,7 @@ Provide your response in JSON format exactly like this:
         "improvedAnswer": "..."
       }`;
 
+      const { jsonModel } = getGenAIModels();
       const result = await jsonModel.generateContent(prompt);
       const content = result.response.text();
       const parsedResult = JSON.parse(content || '{"feedback": "", "score": 0, "improvedAnswer": ""}');
