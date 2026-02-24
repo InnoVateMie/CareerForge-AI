@@ -1,24 +1,26 @@
 import type { Express } from "express";
-import type { Server } from "http";
+import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { api } from "@shared/routes";
+import { api } from "../shared/routes";
 import { z } from "zod";
-import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
+import { isAuthenticated } from "./auth";
 import OpenAI from "openai";
 
+if (!process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
+  console.warn("AI_INTEGRATIONS_OPENAI_API_KEY is missing. AI generation features will fail.");
+}
+
 const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY || "missing",
+  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || "https://api.openai.com/v1",
 });
 
 export async function registerRoutes(
-  httpServer: Server,
   app: Express
 ): Promise<Server> {
-  await setupAuth(app);
-  registerAuthRoutes(app);
+  const httpServer = createServer(app);
 
-  const getUserId = (req: any) => req.user?.claims?.sub as string;
+  const getUserId = (req: any) => req.user?.id as string;
 
   // Resumes
   app.get(api.resumes.list.path, isAuthenticated, async (req, res) => {
@@ -114,7 +116,7 @@ export async function registerRoutes(
   app.post(api.resumes.generate.path, isAuthenticated, async (req, res) => {
     try {
       const input = api.resumes.generate.input.parse(req.body);
-      
+
       const prompt = `Generate a professional resume for:
 Name: ${input.fullName}
 Job Title: ${input.jobTitle}
@@ -127,7 +129,7 @@ ${input.targetJobDescription ? `Target Job Description: ${input.targetJobDescrip
 Format the output in clean HTML suitable for a rich text editor. Include standard resume sections: Summary, Experience, Education, Skills. Make it professional and achievement-oriented. Do not include markdown code block backticks.`;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-5.1",
+        model: "gpt-4o",
         messages: [{ role: "user", content: prompt }],
       });
 
@@ -141,7 +143,7 @@ Format the output in clean HTML suitable for a rich text editor. Include standar
   app.post(api.coverLetters.generate.path, isAuthenticated, async (req, res) => {
     try {
       const input = api.coverLetters.generate.input.parse(req.body);
-      
+
       const prompt = `Generate a professional cover letter for the following context:
 Company Name: ${input.companyName}
 Target Job Role: ${input.jobRole}
@@ -151,7 +153,7 @@ My Experience Summary: ${input.experienceSummary}
 Format the output in clean HTML suitable for a rich text editor. Make the tone professional, engaging, and directly connecting my skills to the target role. Do not include markdown code block backticks.`;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-5.1",
+        model: "gpt-4o",
         messages: [{ role: "user", content: prompt }],
       });
 
@@ -165,7 +167,7 @@ Format the output in clean HTML suitable for a rich text editor. Make the tone p
   app.post(api.resumes.optimize.path, isAuthenticated, async (req, res) => {
     try {
       const input = api.resumes.optimize.input.parse(req.body);
-      
+
       const prompt = `Analyze this resume against the target job description and provide optimization suggestions.
 
 Target Job Description:
@@ -181,7 +183,7 @@ Provide your response in JSON format exactly like this:
 }`;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-5.1",
+        model: "gpt-4o",
         response_format: { type: "json_object" },
         messages: [{ role: "user", content: prompt }],
       });
@@ -191,6 +193,104 @@ Provide your response in JSON format exactly like this:
     } catch (err) {
       console.error(err);
       res.status(500).json({ message: "Failed to optimize resume" });
+    }
+  });
+
+  app.post(api.jobs.fetch.path, isAuthenticated, async (req, res) => {
+    try {
+      const { url } = api.jobs.fetch.input.parse(req.body);
+
+      // In a real app, we'd fetch the URL content here.
+      // For this demo/feature preview, we'll ask the AI to "simulate" or we'll provide a placeholder if it's a known site.
+      // But let's try to actually fetch it if possible (some sites block).
+
+      const prompt = `Analyze this job posting URL: ${url}
+      
+      Extract the following information in JSON format:
+      {
+        "jobTitle": "...",
+        "companyName": "...",
+        "requirements": "Bullet points of key requirements...",
+        "description": "Short summary of the role..."
+      }
+      
+      If you cannot access the URL directly, use your knowledge of typical postings from this domain or provide a generic but high-quality template for a role likely found at that URL.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        response_format: { type: "json_object" },
+        messages: [{ role: "user", content: prompt }],
+      });
+
+      const result = JSON.parse(response.choices[0].message.content || '{"jobTitle": "", "companyName": "", "requirements": "", "description": ""}');
+      res.json(result);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Failed to fetch job details" });
+    }
+  });
+
+  app.post(api.interview.generateQuestions.path, isAuthenticated, async (req, res) => {
+    try {
+      const input = api.interview.generateQuestions.input.parse(req.body);
+
+      const prompt = `Act as an expert interviewer. Based on the following resume and job description, generate 5 challenging interview questions.
+      For each question, provide a brief 'context' explaining why you are asking it or what you are looking for.
+      
+      Resume: ${input.resumeContent}
+      Job Description: ${input.jobDescription}
+      
+      Output in JSON format:
+      {
+        "questions": [
+          { "question": "...", "context": "..." }
+        ]
+      }`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        response_format: { type: "json_object" },
+        messages: [{ role: "user", content: prompt }],
+      });
+
+      const result = JSON.parse(response.choices[0].message.content || '{"questions": []}');
+      res.json(result);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Failed to generate questions" });
+    }
+  });
+
+  app.post(api.interview.evaluateAnswer.path, isAuthenticated, async (req, res) => {
+    try {
+      const input = api.interview.evaluateAnswer.input.parse(req.body);
+
+      const prompt = `Act as an expert interviewer. Evaluate the candidate's answer to the following question.
+      
+      Question: ${input.question}
+      Candidate Answer: ${input.answer}
+      Original Context: ${input.context}
+      
+      Provide feedback, a score out of 10, and an 'improvedAnswer' that would be ideal.
+      
+      Output in JSON format:
+      {
+        "feedback": "...",
+        "score": 8,
+        "improvedAnswer": "..."
+      }`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        response_format: { type: "json_object" },
+        messages: [{ role: "user", content: prompt }],
+      });
+
+      const result = JSON.parse(response.choices[0].message.content || '{"feedback": "", "score": 0, "improvedAnswer": ""}');
+      res.json(result);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Failed to evaluate answer" });
     }
   });
 

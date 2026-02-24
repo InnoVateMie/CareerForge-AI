@@ -14,7 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { marked } from "marked";
 // @ts-ignore
-import html2pdf from "html2pdf.js";
+import html2pdf_lib from "html2pdf.js";
+const html2pdf = html2pdf_lib as any;
 
 const formSchema = z.object({
   companyName: z.string().min(2, "Company name is required"),
@@ -27,8 +28,8 @@ export default function CreateCoverLetter() {
   const [step, setStep] = useState<"form" | "edit">("form");
   const [generatedHtml, setGeneratedHtml] = useState("");
   const [title, setTitle] = useState("");
-  const editorRef = useRef<HTMLDivElement>(null);
-  
+  const letterEditorRef = useRef<HTMLDivElement>(null);
+
   const generateMutation = useGenerateCoverLetter();
   const createMutation = useCreateCoverLetter();
   const { toast } = useToast();
@@ -75,8 +76,8 @@ export default function CreateCoverLetter() {
   };
 
   const handleExportPDF = () => {
-    if (!editorRef.current) return;
-    const element = editorRef.current;
+    if (!letterEditorRef.current) return;
+    const element = letterEditorRef.current;
     const opt = {
       margin: 20,
       filename: `${title || 'cover-letter'}.pdf`,
@@ -136,8 +137,8 @@ export default function CreateCoverLetter() {
                     </FormItem>
                   )} />
 
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="w-full h-12 text-lg shadow-lg shadow-accent/20 bg-accent hover:bg-accent/90 text-white"
                     disabled={generateMutation.isPending}
                   >
@@ -171,17 +172,17 @@ export default function CreateCoverLetter() {
 
             <div className="mb-6">
               <label className="text-sm font-medium mb-2 block">Document Title</label>
-              <Input 
-                value={title} 
-                onChange={e => setTitle(e.target.value)} 
+              <Input
+                value={title}
+                onChange={e => setTitle(e.target.value)}
                 className="max-w-md font-medium text-lg"
               />
             </div>
 
-            <RichTextEditor 
-              content={generatedHtml} 
+            <RichTextEditor
+              content={generatedHtml}
               onChange={setGeneratedHtml}
-              editorRef={editorRef}
+              editorRef={letterEditorRef}
             />
           </>
         )}

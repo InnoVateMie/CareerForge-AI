@@ -8,13 +8,15 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Loader2, Wand2, Download, Save } from "lucide-react";
+import { Loader2, Wand2, Download, Save, FileText } from "lucide-react";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { marked } from "marked";
+import { JobFetcher } from "@/components/JobFetcher";
 // @ts-ignore
-import html2pdf from "html2pdf.js";
+import html2pdf_lib from "html2pdf.js";
+const html2pdf = html2pdf_lib as any;
 
 const formSchema = z.object({
   fullName: z.string().min(2, "Name is required"),
@@ -30,8 +32,8 @@ export default function CreateResume() {
   const [step, setStep] = useState<"form" | "edit">("form");
   const [generatedHtml, setGeneratedHtml] = useState("");
   const [resumeTitle, setResumeTitle] = useState("");
-  const editorRef = useRef<HTMLDivElement>(null);
-  
+  const resumeEditorRef = useRef<any>(null);
+
   const generateMutation = useGenerateResume();
   const createMutation = useCreateResume();
   const { toast } = useToast();
@@ -82,8 +84,8 @@ export default function CreateResume() {
   };
 
   const handleExportPDF = () => {
-    if (!editorRef.current) return;
-    const element = editorRef.current;
+    if (!resumeEditorRef.current) return;
+    const element = resumeEditorRef.current;
     const opt = {
       margin: 15,
       filename: `${resumeTitle || 'resume'}.pdf`,
@@ -92,6 +94,18 @@ export default function CreateResume() {
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     html2pdf().set(opt).from(element).save();
+  };
+
+  const handleExportMarkdown = () => {
+    // result.content is original markdown from mutation, but we don't store it in state across steps.
+    // We can either store it or just use the title and content.
+    // For now, let's just use the current editor content (HTML) and a simple banner.
+    const element = document.createElement("a");
+    const file = new Blob([generatedHtml], { type: 'text/markdown' });
+    element.href = URL.createObjectURL(file);
+    element.download = `${resumeTitle || 'resume'}.md`;
+    document.body.appendChild(element);
+    element.click();
   };
 
   return (
@@ -161,6 +175,13 @@ export default function CreateResume() {
                     )} />
                   </div>
 
+                  <JobFetcher
+                    onFetched={(data) => {
+                      form.setValue("targetJobDescription", data.description + "\n\nRequirements:\n" + data.requirements);
+                      form.setValue("jobTitle", data.jobTitle);
+                    }}
+                  />
+
                   <FormField control={form.control} name="targetJobDescription" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Target Job Description (Optional)</FormLabel>
@@ -170,8 +191,8 @@ export default function CreateResume() {
                     </FormItem>
                   )} />
 
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="w-full h-12 text-lg shadow-lg shadow-primary/20 bg-gradient-to-r from-primary to-accent hover:opacity-90"
                     disabled={generateMutation.isPending}
                   >
@@ -197,6 +218,9 @@ export default function CreateResume() {
                 <Button variant="secondary" onClick={handleExportPDF} className="gap-2">
                   <Download className="w-4 h-4" /> Export PDF
                 </Button>
+                <Button variant="outline" onClick={handleExportMarkdown} className="gap-2">
+                  <FileText className="w-4 h-4" /> Export MD
+                </Button>
                 <Button onClick={handleSave} disabled={createMutation.isPending} className="gap-2 bg-primary hover:bg-primary/90">
                   {createMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   Save
@@ -206,17 +230,17 @@ export default function CreateResume() {
 
             <div className="mb-6">
               <label className="text-sm font-medium mb-2 block">Resume Title</label>
-              <Input 
-                value={resumeTitle} 
-                onChange={e => setResumeTitle(e.target.value)} 
+              <Input
+                value={resumeTitle}
+                onChange={e => setResumeTitle(e.target.value)}
                 className="max-w-md font-medium text-lg"
               />
             </div>
 
-            <RichTextEditor 
-              content={generatedHtml} 
+            <RichTextEditor
+              content={generatedHtml}
               onChange={setGeneratedHtml}
-              editorRef={editorRef}
+              editorRef={resumeEditorRef}
             />
           </>
         )}

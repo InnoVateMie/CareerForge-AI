@@ -1,11 +1,12 @@
-import { 
-  FileText, 
-  Mail, 
-  Target, 
+import {
+  FileText,
+  Mail,
+  Target,
   Briefcase,
   LayoutDashboard,
   LogOut,
-  Sparkles
+  Sparkles,
+  MessageSquare
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
@@ -36,6 +37,7 @@ export function AppSidebar() {
     { title: "Create Resume", url: "/dashboard/resumes/new", icon: Sparkles },
     { title: "Create Cover Letter", url: "/dashboard/cover-letters/new", icon: Briefcase },
     { title: "Job Optimizer", url: "/dashboard/optimize", icon: Target },
+    { title: "Interview Coach", url: "/dashboard/interview", icon: MessageSquare },
   ];
 
   return (
@@ -58,8 +60,8 @@ export function AppSidebar() {
                 const isActive = location === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton 
-                      asChild 
+                    <SidebarMenuButton
+                      asChild
                       isActive={isActive}
                       className={`mb-1 transition-all duration-200 ${isActive ? 'bg-primary/10 text-primary font-medium' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
                     >
@@ -83,8 +85,8 @@ export function AppSidebar() {
                 const isActive = location === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton 
-                      asChild 
+                    <SidebarMenuButton
+                      asChild
                       isActive={isActive}
                       className={`mb-1 transition-all duration-200 ${isActive ? 'bg-primary/10 text-primary font-medium' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
                     >
@@ -101,19 +103,19 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-border/50 p-4">
-        <div className="flex items-center gap-3 px-2 mb-4">
-          <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
-            {user?.firstName?.charAt(0) || user?.email?.charAt(0) || "U"}
+      <SidebarFooter className="border-t border-border/10 p-6 bg-muted/5">
+        <div className="flex items-center gap-4 px-2 mb-6 group cursor-pointer p-2 rounded-2xl hover:bg-primary/5 transition-all duration-300">
+          <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-base shadow-lg shadow-primary/20">
+            {user?.user_metadata?.first_name?.charAt(0) || user?.email?.charAt(0) || "U"}
           </div>
           <div className="flex-1 truncate">
-            <p className="text-sm font-medium text-foreground truncate">{user?.firstName || user?.email}</p>
-            <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+            <p className="text-sm font-bold text-foreground truncate">{user?.user_metadata?.first_name || user?.email?.split('@')[0]}</p>
+            <p className="text-[10px] text-muted-foreground truncate uppercase tracking-widest">{user?.email}</p>
           </div>
         </div>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton 
+            <SidebarMenuButton
               onClick={() => logout()}
               className="text-destructive hover:bg-destructive/10 hover:text-destructive w-full justify-start gap-3 rounded-md px-3 py-2 transition-colors"
             >

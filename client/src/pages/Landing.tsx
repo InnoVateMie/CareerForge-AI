@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { Sparkles, FileText, CheckCircle2, ChevronRight, Layout, Target } from "lucide-react";
+import { Sparkles, FileText, CheckCircle2, Layout, Target, TrendingUp, Zap, Shield } from "lucide-react";
 import { ThreeBackground } from "@/components/ThreeBackground";
+import { Button3D } from "@/components/Button3D";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { Redirect } from "wouter";
@@ -13,18 +14,74 @@ export default function Landing() {
   if (isAuthenticated) return <Redirect to="/dashboard" />;
 
   const features = [
-    { title: "AI-Powered Resumes", description: "Instantly generate professional resumes tailored to your target job using advanced AI models.", icon: FileText },
-    { title: "Targeted Cover Letters", description: "Craft compelling narratives that highlight your unique strengths and cultural fit for every application.", icon: Sparkles },
-    { title: "Job Match Optimizer", description: "Compare your resume against job descriptions to identify missing keywords and critical gaps.", icon: Layout },
-    { title: "Smart Formatting", description: "Export beautifully formatted PDFs that are guaranteed to pass through Applicant Tracking Systems (ATS).", icon: CheckCircle2 },
-    { title: "Career Insights", description: "Receive personalized feedback on your career trajectory based on current market trends and data.", icon: ChevronRight },
-    { title: "Unlimited Revisions", description: "Refine your documents as many times as you need until they're perfect for your dream role.", icon: Target },
+    {
+      title: "AI-Powered Resumes",
+      description: "Instantly generate professional resumes tailored to your target job using advanced AI models.",
+      icon: FileText,
+      color: "from-blue-500 to-cyan-500",
+      glow: "shadow-blue-500/20"
+    },
+    {
+      title: "Targeted Cover Letters",
+      description: "Craft compelling narratives that highlight your unique strengths and cultural fit for every application.",
+      icon: Sparkles,
+      color: "from-purple-500 to-pink-500",
+      glow: "shadow-purple-500/20"
+    },
+    {
+      title: "Job Match Optimizer",
+      description: "Compare your resume against job descriptions to identify missing keywords and critical gaps.",
+      icon: Layout,
+      color: "from-emerald-500 to-teal-500",
+      glow: "shadow-emerald-500/20"
+    },
+    {
+      title: "Career Insights",
+      description: "Receive personalized feedback on your career trajectory based on current market trends and data.",
+      icon: TrendingUp,
+      color: "from-amber-500 to-orange-500",
+      glow: "shadow-amber-500/20"
+    },
+    {
+      title: "ATS Optimization",
+      description: "Export beautifully formatted documents guaranteed to pass through Applicant Tracking Systems.",
+      icon: Zap,
+      color: "from-rose-500 to-red-500",
+      glow: "shadow-rose-500/20"
+    },
+    {
+      title: "Privacy Focused",
+      description: "Your data is encrypted and secure. We prioritize your privacy throughout your job search journey.",
+      icon: Shield,
+      color: "from-indigo-500 to-blue-500",
+      glow: "shadow-indigo-500/20"
+    },
   ];
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.3,
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: "easeOut" }
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#0A0B10] text-slate-200 relative overflow-hidden flex flex-col">
+    <div className="dark min-h-screen bg-[#0A0B10] text-slate-200 relative overflow-hidden flex flex-col font-sans">
       <ThreeBackground />
-      
+
       <header className="relative z-20 w-full px-6 py-4 flex items-center justify-between max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
           <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/25">
@@ -38,8 +95,8 @@ export default function Landing() {
           <a href="#pricing" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Pricing</a>
         </div>
         <div>
-          <Button 
-            onClick={() => window.location.href = "/api/login"}
+          <Button
+            onClick={() => window.location.href = "/auth"}
             className="rounded-full px-6 font-medium bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/10"
           >
             Sign In
@@ -54,48 +111,78 @@ export default function Landing() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel mb-8 text-sm font-medium text-cyan-200 border-cyan-500/20">
-              <Sparkles className="w-4 h-4" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-8 text-sm font-medium text-primary-foreground/90 backdrop-blur-md shadow-[0_0_15px_rgba(var(--primary),0.1)]">
+              <Sparkles className="w-4 h-4 text-primary" />
               <span>Next-Gen Career Building Platform</span>
             </div>
-            
+
             <h1 className="text-5xl md:text-7xl font-bold font-display leading-tight tracking-tight mb-6 text-white">
               Forge your dream career with <br />
               <span className="text-gradient">Intelligent Precision</span>
             </h1>
-            
-            <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-              Stop guessing what recruiters want. Our AI analyzes job descriptions, highlights your best traits, and generates perfect resumes in seconds.
+
+            <p className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed overflow-hidden">
+              {"Stop guessing what recruiters want. Our AI analyzes job descriptions, highlights your best traits, and generates perfect resumes in seconds.".split(" ").map((word, i) => (
+                <motion.span
+                  key={i}
+                  initial={{ opacity: 0.4 }}
+                  animate={{
+                    opacity: [0.4, 1, 0.4],
+                    y: [0, -4, 0],
+                    color: ["#cbd5e1", "#ffffff", "#cbd5e1"]
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    delay: i * 0.1,
+                    ease: "easeInOut"
+                  }}
+                  className="inline-block mr-1"
+                >
+                  {word}
+                </motion.span>
+              ))}
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button 
-                onClick={() => window.location.href = "/api/login"}
-                size="lg" 
-                className="rounded-full px-8 py-6 text-lg font-semibold bg-gradient-to-r from-primary to-accent hover:opacity-90 shadow-xl shadow-primary/25 hover:shadow-primary/40 transition-all hover:-translate-y-1 w-full sm:w-auto text-white"
-              >
-                Get Started Free
-                <ChevronRight className="ml-2 w-5 h-5" />
-              </Button>
+            <div className="flex flex-col items-center justify-center mt-8">
+              <Button3D
+                text="Get Started Free"
+                onClick={() => window.location.href = "/auth"}
+              />
             </div>
           </motion.div>
 
-          <section id="features" className="mt-32">
-            <motion.div 
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
+          <section id="features" className="mt-20">
+
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
               className="grid grid-cols-1 md:grid-cols-3 gap-6"
             >
               {features.map((feature, i) => (
-                <div key={i} className="glass-panel p-8 rounded-2xl text-left hover:-translate-y-2 transition-all duration-300">
-                  <div className="h-12 w-12 rounded-xl bg-primary/20 flex items-center justify-center mb-6 text-primary">
-                    <feature.icon className="w-6 h-6" />
+                <motion.div
+                  key={i}
+                  variants={itemVariants}
+                  whileHover={{
+                    y: -10,
+                    scale: 1.02,
+                    rotateX: 2,
+                    rotateY: 2,
+                    transition: { duration: 0.2 }
+                  }}
+                  className="group relative bg-slate-900/40 backdrop-blur-xl border border-white/5 p-8 rounded-2xl text-left transition-colors hover:border-white/20 overflow-hidden"
+                >
+                  <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-[0.03] transition-opacity`} />
+                  <div className="relative z-10">
+                    <div className={`h-12 w-12 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-6 shadow-lg ${feature.glow} group-hover:scale-110 transition-transform duration-300`}>
+                      <feature.icon className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-3 font-display">{feature.title}</h3>
+                    <p className="text-slate-400 leading-relaxed group-hover:text-slate-300 transition-colors">{feature.description}</p>
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-3 font-display">{feature.title}</h3>
-                  <p className="text-slate-400 leading-relaxed">{feature.description}</p>
-                </div>
+                </motion.div>
               ))}
             </motion.div>
           </section>
@@ -115,7 +202,7 @@ export default function Landing() {
               Empowering professionals to reach their full potential through intelligent document generation and career insights.
             </p>
           </div>
-          
+
           <div>
             <h4 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Product</h4>
             <ul className="space-y-4">

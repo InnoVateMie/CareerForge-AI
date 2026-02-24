@@ -161,6 +161,61 @@ export const api = {
         401: errorSchemas.unauthorized
       }
     }
+  },
+  jobs: {
+    fetch: {
+      method: "POST" as const,
+      path: "/api/jobs/fetch" as const,
+      input: z.object({ url: z.string().url() }),
+      responses: {
+        200: z.object({
+          jobTitle: z.string(),
+          companyName: z.string(),
+          requirements: z.string(),
+          description: z.string(),
+        }),
+        500: errorSchemas.internal,
+        401: errorSchemas.unauthorized,
+      },
+    },
+  },
+  interview: {
+    generateQuestions: {
+      method: "POST" as const,
+      path: "/api/interview/generate" as const,
+      input: z.object({
+        resumeContent: z.string(),
+        jobDescription: z.string(),
+      }),
+      responses: {
+        200: z.object({
+          questions: z.array(z.object({
+            question: z.string(),
+            context: z.string(),
+          })),
+        }),
+        500: errorSchemas.internal,
+        401: errorSchemas.unauthorized,
+      },
+    },
+    evaluateAnswer: {
+      method: "POST" as const,
+      path: "/api/interview/evaluate" as const,
+      input: z.object({
+        question: z.string(),
+        answer: z.string(),
+        context: z.string(),
+      }),
+      responses: {
+        200: z.object({
+          feedback: z.string(),
+          score: z.number().min(0).max(10),
+          improvedAnswer: z.string(),
+        }),
+        500: errorSchemas.internal,
+        401: errorSchemas.unauthorized,
+      },
+    }
   }
 };
 
