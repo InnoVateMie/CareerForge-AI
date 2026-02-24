@@ -1,4 +1,4 @@
-import "dotenv/config";
+// env vars are provided by platform (Netlify) in production; dotenv is only needed locally via .env
 import { createApp } from "./app";
 import { createServer } from "http";
 import { serveStatic } from "./static";
