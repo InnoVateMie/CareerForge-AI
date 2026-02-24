@@ -2,10 +2,17 @@ import { type Request, type Response, type NextFunction } from "express";
 import { createClient } from "@supabase/supabase-js";
 
 export const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
+    // Skip auth for OPTIONS (CORS preflight)
+    if (req.method === 'OPTIONS') {
+        return next();
+    }
+
     const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    console.log("[auth] checking env vars - url:", !!supabaseUrl, "key:", !!serviceKey);
+    // Log request details for debugging 401s
+    console.log(`[auth] Request: ${req.method} ${req.url}`);
+    console.log(`[auth] Headers keys:`, Object.keys(req.headers));
 
     if (!supabaseUrl || !serviceKey) {
         console.error("[auth] MISSING env vars - url:", !!supabaseUrl, "key:", !!serviceKey);
