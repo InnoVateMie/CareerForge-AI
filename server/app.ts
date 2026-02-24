@@ -59,6 +59,7 @@ export async function createApp() {
 
     app.get("/api/debug/full", async (req, res) => {
         const report: any = {
+            version: "DR-001-FLASH-LATEST-FIX", // Unique ID to track if deploy updated
             timestamp: new Date().toISOString(),
             env: {
                 NODE_ENV: process.env.NODE_ENV,
@@ -81,6 +82,8 @@ export async function createApp() {
         }
 
         // Test AI
+        const modelName = "gemini-1.5-flash-latest";
+        report.tests.ai_tried = modelName;
         try {
             const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
             if (!apiKey || apiKey === "missing") {
@@ -88,7 +91,6 @@ export async function createApp() {
             } else {
                 const { GoogleGenerativeAI } = await import("@google/generative-ai");
                 const genAI = new GoogleGenerativeAI(apiKey);
-                const modelName = "gemini-1.5-flash-latest";
                 const model = genAI.getGenerativeModel({ model: modelName });
                 const start = Date.now();
                 const result = await model.generateContent("echo test");
@@ -96,7 +98,7 @@ export async function createApp() {
                 report.tests.ai = { ok: true, duration: Date.now() - start, echo: !!text, model: modelName };
             }
         } catch (err: any) {
-            report.tests.ai = { ok: false, error: err.message };
+            report.tests.ai = { ok: false, error: err.message, model_used: modelName };
         }
 
         res.json(report);
