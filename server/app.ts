@@ -59,7 +59,7 @@ export async function createApp() {
 
     app.get("/api/debug/full", async (req, res) => {
         const report: any = {
-            version: "DR-002-MULTI-MODEL-TEST", // Updated for multi-model test
+            version: "DR-003-FINAL-SCAN", // Final version for multi-test
             timestamp: new Date().toISOString(),
             env: {
                 NODE_ENV: process.env.NODE_ENV,
@@ -85,9 +85,9 @@ export async function createApp() {
         const modelsToTry = [
             "gemini-1.5-flash",
             "gemini-1.5-flash-latest",
-            "gemini-1.5-flash-001",
-            "gemini-1.5-flash-002",
-            "gemini-1.0-pro"
+            "models/gemini-1.5-flash",
+            "models/gemini-1.5-flash-latest",
+            "gemini-pro"
         ];
         report.tests.ai_summary = "Starting multi-model test...";
 
