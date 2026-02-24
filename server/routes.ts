@@ -163,7 +163,7 @@ export async function registerRoutes(
       const input = api.resumes.generate.input.parse(req.body);
       console.log("[generate] Input parsed for:", input.fullName);
 
-      const prompt = `Generate a professional resume for:
+      const prompt = `Generate a high-end, professional resume for:
 Name: ${input.fullName}
 Job Title: ${input.jobTitle}
 Skills: ${input.skills}
@@ -172,7 +172,19 @@ Education: ${input.education}
 ${input.certifications ? `Certifications: ${input.certifications}` : ''}
 ${input.targetJobDescription ? `Target Job Description: ${input.targetJobDescription}` : ''}
 
-Format the output in clean HTML suitable for a rich text editor. Include standard resume sections: Summary, Experience, Education, Skills. Make it professional and achievement-oriented. Do not include markdown code block backticks.`;
+CRITICAL INSTRUCTIONS:
+1. Use semantic HTML5 only (Header, Section, Main).
+2. Use specific class names for styling: 
+   - Wrap the whole content in <div class="premium-resume">
+   - Name: <h1>
+   - Contact Info: <div class="subtitle">
+   - Sections: <section> with <h2> headers
+   - Experience Items: <div class="exp-item">
+   - Role/Job Title: <div class="exp-header"><span>JOB_TITLE</span><span class="date">DATE_RANGE</span></div>
+   - Company: <div class="company-info">COMPANY_NAME</div>
+   - Use <ul> and <li> for achievements. 
+3. Content Quality: Use the STAR method (Situation, Task, Action, Result) for all work experience bullets. Focus on measurable achievements.
+4. Output raw HTML only. Do NOT include markdown code blocks or backticks.`;
 
       console.log("[generate] Initializing Gemini models...");
       const { model } = getGenAIModels();

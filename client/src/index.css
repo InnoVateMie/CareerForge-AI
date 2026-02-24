@@ -179,3 +179,111 @@
     @apply bg-primary/30 rounded-full hover:bg-primary/50 transition-colors;
   }
 }
+
+/* Premium Resume Design System */
+.premium-resume {
+  font-family: 'DM Sans', sans-serif !important;
+  line-height: 1.6 !important;
+  color: #1a202c !important;
+  background: white !important;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 3rem !important;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.premium-resume h1 {
+  font-family: var(--font-display) !important;
+  font-size: 3rem !important;
+  color: #1e3a8a !important;
+  margin-bottom: 0.75rem !important;
+  text-align: center;
+  border-bottom: 4px solid #3b82f6 !important;
+  padding-bottom: 1rem !important;
+  font-weight: 800 !important;
+}
+
+.premium-resume .subtitle {
+  text-align: center;
+  font-size: 1rem !important;
+  color: #475569 !important;
+  margin-bottom: 3rem !important;
+  font-style: italic;
+  letter-spacing: 0.025em;
+}
+
+.premium-resume h2 {
+  font-family: var(--font-display) !important;
+  font-size: 1.5rem !important;
+  color: #1d4ed8 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border-bottom: 2px solid #cbd5e1 !important;
+  margin-top: 2.5rem !important;
+  margin-bottom: 1.5rem !important;
+  padding-bottom: 0.5rem !important;
+  font-weight: 700 !important;
+}
+
+.premium-resume .section-content {
+  margin-bottom: 2rem !important;
+}
+
+.premium-resume .exp-item {
+  margin-bottom: 1.75rem !important;
+}
+
+.premium-resume .exp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  font-size: 1.2rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.premium-resume .company-info {
+  font-style: italic;
+  color: #334155 !important;
+  margin-bottom: 1rem !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+}
+
+.premium-resume ul {
+  list-style-type: disc !important;
+  padding-left: 2rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.premium-resume li {
+  margin-bottom: 0.5rem !important;
+  color: #475569 !important;
+  line-height: 1.6;
+}
+
+.premium-resume .skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.25rem;
+}
+
+.premium-resume .skill-item {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  padding: 0.75rem 1rem !important;
+  border-radius: 0.75rem !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  color: #334155 !important;
+  text-align: center;
+}
+
+.premium-resume .date {
+  font-family: var(--font-display) !important;
+  font-size: 0.9rem !important;
+  color: #64748b !important;
+  font-weight: 600 !important;
+}

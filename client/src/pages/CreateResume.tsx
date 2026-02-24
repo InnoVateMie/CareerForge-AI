@@ -237,11 +237,13 @@ export default function CreateResume() {
               />
             </div>
 
-            <RichTextEditor
-              content={generatedHtml}
-              onChange={setGeneratedHtml}
-              editorRef={resumeEditorRef}
-            />
+            <div className="premium-resume-container bg-white rounded-xl shadow-lg border border-border p-8 overflow-hidden">
+              <RichTextEditor
+                content={generatedHtml}
+                onChange={setGeneratedHtml}
+                editorRef={resumeEditorRef}
+              />
+            </div>
           </>
         )}
       </div>
