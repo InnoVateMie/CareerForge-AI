@@ -1,16 +1,16 @@
 import { type Request, type Response, type NextFunction } from "express";
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!supabaseUrl || !serviceKey) {
-    throw new Error("CRITICAL: SUPABASE_SERVICE_ROLE_KEY or VITE_SUPABASE_URL is missing. Production auth will fail.");
-}
-
-const supabase = createClient(supabaseUrl, serviceKey);
-
 export const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
+    const supabaseUrl = process.env.VITE_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !serviceKey) {
+        console.error("CRITICAL: SUPABASE_SERVICE_ROLE_KEY or VITE_SUPABASE_URL is missing.");
+        return res.status(500).json({ message: "Server misconfiguration: Supabase keys missing." });
+    }
+
+    const supabase = createClient(supabaseUrl, serviceKey);
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
