@@ -199,8 +199,12 @@ Format the output in clean HTML suitable for a rich text editor. Make the tone p
 
       res.json({ content: content || "" });
     } catch (err: any) {
-      console.error("COVER LETTER GENERATE FAILED:", err?.message || err);
-      res.status(500).json({ message: "Failed to generate cover letter", detail: err?.message });
+      console.error("COVER LETTER GENERATE FAILED:", err);
+      res.status(500).json({
+        message: "Failed to generate cover letter",
+        detail: err?.message || String(err),
+        type: err?.name
+      });
     }
   });
 
@@ -227,9 +231,12 @@ Provide your response in JSON format exactly like this:
       const content = result.response.text();
       const parsedResult = JSON.parse(content || '{"analysis": "", "suggestions": ""}');
       res.json(parsedResult);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Failed to optimize resume" });
+    } catch (err: any) {
+      console.error("RESUME OPTIMIZE FAILED:", err);
+      res.status(500).json({
+        message: "Failed to optimize resume",
+        detail: err?.message || String(err)
+      });
     }
   });
 
@@ -258,9 +265,12 @@ Provide your response in JSON format exactly like this:
       const content = result.response.text();
       const parsedResult = JSON.parse(content || '{"jobTitle": "", "companyName": "", "requirements": "", "description": ""}');
       res.json(parsedResult);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Failed to fetch job details" });
+    } catch (err: any) {
+      console.error("JOB FETCH FAILED:", err);
+      res.status(500).json({
+        message: "Failed to fetch job details",
+        detail: err?.message || String(err)
+      });
     }
   });
 
@@ -286,9 +296,12 @@ Provide your response in JSON format exactly like this:
       const content = result.response.text();
       const parsedResult = JSON.parse(content || '{"questions": []}');
       res.json(parsedResult);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Failed to generate questions" });
+    } catch (err: any) {
+      console.error("QUESTIONS GENERATE FAILED:", err);
+      res.status(500).json({
+        message: "Failed to generate questions",
+        detail: err?.message || String(err)
+      });
     }
   });
 
@@ -316,9 +329,12 @@ Provide your response in JSON format exactly like this:
       const content = result.response.text();
       const parsedResult = JSON.parse(content || '{"feedback": "", "score": 0, "improvedAnswer": ""}');
       res.json(parsedResult);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Failed to evaluate answer" });
+    } catch (err: any) {
+      console.error("INTERVIEW EVALUATE FAILED:", err);
+      res.status(500).json({
+        message: "Failed to evaluate answer",
+        detail: err?.message || String(err)
+      });
     }
   });
 
