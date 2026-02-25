@@ -250,25 +250,29 @@ REQUIRED HTML STRUCTURE:
       const input = api.coverLetters.generate.input.parse(req.body);
       console.log("[generate] STAGE: Input Parsed -", input.companyName);
 
-      const prompt = `Generate a professional cover letter for ${input.companyName} as a ${input.jobRole}.
+      const prompt = `Generate a high-end, professional cover letter for ${input.companyName} as a ${input.jobRole}.
 My Skills: ${input.skills}
 Experience: ${input.experienceSummary}
 
-Output CLEAN, SEMANTIC HTML using these classes:
-1. Wrap in <div class="premium-letter">
+Format as CLEAN HTML with sections:
+1. Shell: <div class="premium-letter">
 2. Header: <div class="letter-header"><h1>[Full Name]</h1><div class="contact-info"><span>[Email]</span> | <span>[Phone]</span></div></div>
-3. Recipient: <div class="recipient-info"><div class="date">[Date]</div><div class="manager">Hiring Manager</div><div class="company">${input.companyName}</div></div>
-4. Subject: <div class="letter-subject">RE: ${input.jobRole}</div>
-5. Body: Use <p> tags. Professional tone.
-6. Closing: <div class="closing"><p>Best regards,</p><div class="signature-name">[Name]</div></div>
+3. Body: Use <p> tags. Focus on impact.
+4. Closing: <div class="closing"><p>Best regards,</p><div class="signature-name">[Name]</div></div>
 
-[IMPORTANT]: RAW HTML ONLY. No markdown code blocks.`;
+[IMPORTANT]: HTML body ONLY. No markdown. Be concise.`;
 
-      console.log("[generate] STAGE: Initializing Gemini");
+      console.log("[generate] STAGE: Initializing Gemini with token limits");
       const { model } = getGenAIModels();
 
-      console.log("[generate] STAGE: Calling AI API...");
-      const result = await model.generateContent(prompt);
+      console.log("[generate] STAGE: Calling AI API (Max Tokens: 800)...");
+      const result = await model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: {
+          maxOutputTokens: 800,
+          temperature: 0.7,
+        }
+      });
 
       console.log("[generate] STAGE: Awaiting Response...");
       const response = await result.response;
