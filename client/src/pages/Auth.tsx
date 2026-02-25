@@ -23,20 +23,27 @@ export default function AuthPage() {
         e.preventDefault();
         setLoading(true);
         try {
-            const { error } = isLogin
+            const { data, error } = isLogin
                 ? await supabase.auth.signInWithPassword({ email, password })
                 : await supabase.auth.signUp({ email, password });
 
             if (error) throw error;
 
             console.log(`[auth] ${isLogin ? 'Login' : 'Signup'} successful`);
-            if (!isLogin) {
+
+            // If we have a session (instant signup or login), go to dashboard
+            if (data?.session) {
+                toast({
+                    title: isLogin ? "Welcome back!" : "Account created!",
+                    description: isLogin ? "Accessing your workspace..." : "Starting your career journey...",
+                });
+                setLocation("/dashboard");
+            } else if (!isLogin) {
+                // If no session but signup was successful, confirmation is required
                 toast({
                     title: "Registration successful!",
-                    description: "Please check your email to confirm your account.",
+                    description: "Please check your email to confirm your account before logging in.",
                 });
-            } else {
-                setLocation("/dashboard");
             }
         } catch (error: any) {
             console.error("[auth] Error details:", error);
