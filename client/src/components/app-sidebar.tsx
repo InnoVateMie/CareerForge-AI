@@ -120,7 +120,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-border/10 p-4 bg-muted/5 backdrop-blur-sm">
+      <SidebarFooter className="border-t border-border/10 p-4 bg-sidebar">
         <div className="flex items-center gap-3 px-2 py-3 group cursor-pointer rounded-2xl bg-background/40 border border-white/5 hover:border-primary/20 hover:bg-primary/5 transition-all duration-500">
           <div className="h-10 w-10 relative flex-shrink-0">
             <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-xl blur-sm opacity-20 group-hover:opacity-40 transition-opacity" />

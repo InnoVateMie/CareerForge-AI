@@ -41,7 +41,7 @@
 
     --radius: 1rem;
 
-    --sidebar-background: 0 0% 100% / 0.5;
+    --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 250 84% 54%;
     --sidebar-primary-foreground: 0 0% 98%;
@@ -81,7 +81,7 @@
     --input: 222 47% 12%;
     --ring: 250 89% 65%;
 
-    --sidebar-background: 222 47% 4% / 0.5;
+    --sidebar-background: 222 47% 4%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 250 89% 65%;
     --sidebar-primary-foreground: 222 47% 11%;
