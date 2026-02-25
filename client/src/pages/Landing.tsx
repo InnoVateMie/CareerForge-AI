@@ -1,20 +1,18 @@
 import { motion } from "framer-motion";
 import {
-  Sparkles, FileText, Layout, TrendingUp, Zap, Shield,
-  Star, Check, ArrowRight, Quote, Crown, Rocket, Leaf
+  Sparkles, FileText, Layout, TrendingUp, Zap, Shield, Check, ArrowRight
 } from "lucide-react";
 import { ThreeBackground } from "@/components/ThreeBackground";
 import { Button3D } from "@/components/Button3D";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { Redirect } from "wouter";
+import { Redirect, Link } from "wouter";
 import React from "react";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
   visible: (i = 0) => ({
-    opacity: 1,
-    y: 0,
+    opacity: 1, y: 0,
     transition: { duration: 0.6, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] },
   }),
 };
@@ -28,8 +26,6 @@ export default function Landing() {
   const { isAuthenticated, isLoading } = useAuth();
   if (isLoading) return null;
   if (isAuthenticated) return <Redirect to="/dashboard" />;
-
-  /* ───── DATA ───── */
 
   const features = [
     {
@@ -59,123 +55,8 @@ export default function Landing() {
     },
     {
       title: "Bank-Grade Privacy",
-      description: "End-to-end encryption and zero data-selling policy. Your career data belongs only to you — always.",
+      description: "End-to-end encryption and a zero-data-selling policy. Your career data belongs only to you — always.",
       icon: Shield, color: "from-indigo-500 to-violet-500", glow: "shadow-indigo-500/30",
-    },
-  ];
-
-  const testimonials = [
-    {
-      name: "Amara Osei",
-      role: "Senior Product Manager @ Google",
-      avatar: "AO",
-      avatarColor: "from-pink-500 to-rose-500",
-      stars: 5,
-      quote: "I landed 3 interviews in my first week using CareerForge. The Job Match Optimizer was a game-changer — it told me exactly which keywords I was missing before I even applied.",
-    },
-    {
-      name: "Liam Martinez",
-      role: "Software Engineer @ Stripe",
-      avatar: "LM",
-      avatarColor: "from-blue-500 to-cyan-500",
-      stars: 5,
-      quote: "The resume it generated for me was miles ahead of what I had. Structured, keyword-rich, and visually polished. It felt like it was written by a professional recruiter who knew my field inside out.",
-    },
-    {
-      name: "Fatima Al-Hassan",
-      role: "Data Scientist @ Microsoft",
-      avatar: "FA",
-      avatarColor: "from-emerald-500 to-teal-500",
-      stars: 5,
-      quote: "As someone pivoting from academia, I had no idea how to present my PhD work for industry roles. CareerForge translated my research into business value instantly. I got my dream job in 6 weeks.",
-    },
-    {
-      name: "James Okonkwo",
-      role: "UX Lead @ Shopify",
-      avatar: "JO",
-      avatarColor: "from-amber-500 to-orange-500",
-      stars: 5,
-      quote: "The cover letter generator is exceptional. Every letter felt personal and on-brand. My recruiter literally said my cover letter was one of the best she'd ever read.",
-    },
-    {
-      name: "Priya Nair",
-      role: "Finance Analyst @ JPMorgan",
-      avatar: "PN",
-      avatarColor: "from-violet-500 to-purple-500",
-      stars: 5,
-      quote: "I was skeptical about AI-generated content being too generic. CareerForge completely changed my mind. The tailoring is genuinely impressive — totally specific to my experience and target role.",
-    },
-    {
-      name: "David Chen",
-      role: "Marketing Director @ HubSpot",
-      avatar: "DC",
-      avatarColor: "from-indigo-500 to-blue-500",
-      stars: 5,
-      quote: "The Interview Coach feature helped me go into every interview feeling prepared. The STAR-method feedback was detailed and actionable. Worth every single penny.",
-    },
-  ];
-
-  const plans = [
-    {
-      name: "Starter",
-      icon: Leaf,
-      price: "Free",
-      priceNote: "Forever",
-      color: "from-slate-700 to-slate-800",
-      borderColor: "border-white/10",
-      badge: null,
-      cta: "Get Started",
-      ctaStyle: "bg-white/10 hover:bg-white/20 text-white border border-white/10",
-      features: [
-        "3 AI Resume Generations / mo",
-        "3 Cover Letter Generations / mo",
-        "Basic Job Match Scoring",
-        "PDF Export",
-        "Community Support",
-      ],
-      missing: ["Interview Coach", "Unlimited Documents", "Priority AI Queue"],
-    },
-    {
-      name: "Pro",
-      icon: Rocket,
-      price: "$12",
-      priceNote: "per month",
-      color: "from-primary to-violet-600",
-      borderColor: "border-primary/50",
-      badge: "Most Popular",
-      cta: "Start Free Trial",
-      ctaStyle: "bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/40",
-      features: [
-        "Unlimited AI Resume Generations",
-        "Unlimited Cover Letters",
-        "Advanced Job Match Optimizer",
-        "AI Interview Coach (STAR Method)",
-        "Priority AI Processing",
-        "PDF & Word Export",
-        "Email Support",
-      ],
-      missing: ["Team Seats", "White-label Export"],
-    },
-    {
-      name: "Enterprise",
-      icon: Crown,
-      price: "$49",
-      priceNote: "per month",
-      color: "from-amber-500 to-orange-600",
-      borderColor: "border-amber-500/30",
-      badge: "Best Value",
-      cta: "Contact Sales",
-      ctaStyle: "bg-gradient-to-r from-amber-500 to-orange-500 hover:opacity-90 text-white shadow-lg shadow-amber-500/30",
-      features: [
-        "Everything in Pro",
-        "Up to 10 Team Seats",
-        "White-label Resume Export",
-        "Dedicated Account Manager",
-        "Custom AI Prompt Tuning",
-        "Analytics Dashboard",
-        "SLA Support (24h response)",
-      ],
-      missing: [],
     },
   ];
 
@@ -195,8 +76,8 @@ export default function Landing() {
         </div>
         <nav className="hidden md:flex items-center gap-8">
           <a href="#features" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Features</a>
-          <a href="#testimonials" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Testimonials</a>
-          <a href="#pricing" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Pricing</a>
+          <Link href="/testimonials"><span className="text-sm font-medium text-slate-400 hover:text-white transition-colors cursor-pointer">Testimonials</span></Link>
+          <Link href="/pricing"><span className="text-sm font-medium text-slate-400 hover:text-white transition-colors cursor-pointer">Pricing</span></Link>
         </nav>
         <Button
           onClick={() => window.location.href = "/auth"}
@@ -243,7 +124,7 @@ export default function Landing() {
         </div>
 
         {/* ─── FEATURES ─── */}
-        <section id="features" className="w-full max-w-6xl mx-auto mt-32 px-4">
+        <section id="features" className="w-full max-w-6xl mx-auto mt-32 px-4 pb-32">
           <motion.div
             custom={0} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }}
             className="text-center mb-16"
@@ -276,137 +157,18 @@ export default function Landing() {
               </motion.div>
             ))}
           </motion.div>
-        </section>
 
-        {/* ─── TESTIMONIALS ─── */}
-        <section id="testimonials" className="w-full max-w-6xl mx-auto mt-36 px-4">
+          {/* CTA beneath features */}
           <motion.div
-            custom={0} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }}
-            className="text-center mb-16"
-          >
-            <span className="text-xs font-bold uppercase tracking-widest text-primary mb-4 block">Loved by professionals</span>
-            <h2 className="text-4xl md:text-5xl font-bold font-display text-white mb-5">
-              Real results, real people
-            </h2>
-            <p className="text-slate-400 max-w-xl mx-auto text-lg">
-              From fresh graduates to senior directors — CareerForge has helped thousands land the roles they deserve.
-            </p>
-          </motion.div>
-
-          <motion.div
-            variants={stagger} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {testimonials.map((t, i) => (
-              <motion.div
-                key={i} variants={fadeUp}
-                whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                className="relative bg-slate-900/50 backdrop-blur-xl border border-white/5 hover:border-white/15 p-7 rounded-2xl text-left transition-all overflow-hidden"
-              >
-                {/* decorative quote mark */}
-                <Quote className="absolute top-5 right-6 w-8 h-8 text-white/5" />
-
-                {/* Stars */}
-                <div className="flex gap-1 mb-5">
-                  {Array.from({ length: t.stars }).map((_, si) => (
-                    <Star key={si} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                  ))}
-                </div>
-
-                <p className="text-slate-300 leading-relaxed text-sm mb-6 italic">
-                  "{t.quote}"
-                </p>
-
-                <div className="flex items-center gap-3 mt-auto">
-                  <div className={`h-10 w-10 rounded-full bg-gradient-to-br ${t.avatarColor} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
-                    {t.avatar}
-                  </div>
-                  <div>
-                    <p className="text-white font-bold text-sm">{t.name}</p>
-                    <p className="text-slate-500 text-xs">{t.role}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </section>
-
-        {/* ─── PRICING ─── */}
-        <section id="pricing" className="w-full max-w-6xl mx-auto mt-36 px-4 pb-32">
-          <motion.div
-            custom={0} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }}
-            className="text-center mb-16"
-          >
-            <span className="text-xs font-bold uppercase tracking-widest text-primary mb-4 block">Simple, transparent pricing</span>
-            <h2 className="text-4xl md:text-5xl font-bold font-display text-white mb-5">
-              Invest in your career
-            </h2>
-            <p className="text-slate-400 max-w-xl mx-auto text-lg">
-              Start free, upgrade when you're ready. No hidden fees, no dark patterns.
-            </p>
-          </motion.div>
-
-          <motion.div
-            variants={stagger} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start"
-          >
-            {plans.map((plan, i) => (
-              <motion.div
-                key={i} variants={fadeUp}
-                whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                className={`relative bg-slate-900/50 backdrop-blur-xl border ${plan.borderColor} rounded-2xl p-8 text-left overflow-hidden transition-all ${plan.name === "Pro" ? "md:-mt-4 md:pb-12 shadow-2xl shadow-primary/20" : ""}`}
-              >
-                {/* Badge */}
-                {plan.badge && (
-                  <div className={`absolute top-0 right-6 -translate-y-1/2 px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r ${plan.color} shadow-lg`}>
-                    {plan.badge}
-                  </div>
-                )}
-
-                {/* Header */}
-                <div className={`h-12 w-12 rounded-xl bg-gradient-to-br ${plan.color} flex items-center justify-center mb-6 shadow-lg`}>
-                  <plan.icon className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-1 font-display">{plan.name}</h3>
-                <div className="flex items-baseline gap-1 mb-6">
-                  <span className="text-4xl font-black text-white">{plan.price}</span>
-                  <span className="text-slate-500 text-sm">/ {plan.priceNote}</span>
-                </div>
-
-                {/* CTA */}
-                <button
-                  onClick={() => window.location.href = "/auth"}
-                  className={`w-full py-3 rounded-xl font-bold text-sm transition-all mb-8 ${plan.ctaStyle}`}
-                >
-                  {plan.cta}
-                </button>
-
-                {/* Feature list */}
-                <ul className="space-y-3">
-                  {plan.features.map((feat, fi) => (
-                    <li key={fi} className="flex items-start gap-2.5 text-sm text-slate-300">
-                      <Check className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
-                      {feat}
-                    </li>
-                  ))}
-                  {plan.missing.map((feat, fi) => (
-                    <li key={fi} className="flex items-start gap-2.5 text-sm text-slate-600 line-through">
-                      <Check className="w-4 h-4 text-slate-700 mt-0.5 shrink-0" />
-                      {feat}
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {/* Money-back note */}
-          <motion.p
             custom={1} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}
-            className="text-center text-slate-600 text-sm mt-10"
+            className="text-center mt-16"
           >
-            All paid plans come with a <span className="text-slate-400 font-semibold">14-day money-back guarantee</span>. No questions asked.
-          </motion.p>
+            <Link href="/pricing">
+              <button className="px-8 py-4 rounded-full bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-semibold text-sm border border-white/10 transition-all flex items-center gap-2 mx-auto">
+                Compare Plans & Pricing <ArrowRight className="w-4 h-4" />
+              </button>
+            </Link>
+          </motion.div>
         </section>
       </main>
 
@@ -426,16 +188,14 @@ export default function Landing() {
               Empowering professionals to reach their full potential through intelligent document generation and career insights.
             </p>
           </div>
-
           <div>
             <h4 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Product</h4>
             <ul className="space-y-4">
               <li><a href="#features" className="text-slate-500 hover:text-primary transition-colors text-sm">Features</a></li>
-              <li><a href="#pricing" className="text-slate-500 hover:text-primary transition-colors text-sm">Pricing</a></li>
-              <li><a href="#testimonials" className="text-slate-500 hover:text-primary transition-colors text-sm">Testimonials</a></li>
+              <li><Link href="/pricing"><span className="text-slate-500 hover:text-primary transition-colors text-sm cursor-pointer">Pricing</span></Link></li>
+              <li><Link href="/testimonials"><span className="text-slate-500 hover:text-primary transition-colors text-sm cursor-pointer">Testimonials</span></Link></li>
             </ul>
           </div>
-
           <div>
             <h4 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Company</h4>
             <ul className="space-y-4">
@@ -444,7 +204,6 @@ export default function Landing() {
               <li><a href="#" className="text-slate-500 hover:text-primary transition-colors text-sm">Terms</a></li>
             </ul>
           </div>
-
           <div>
             <h4 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Connect</h4>
             <ul className="space-y-4">
@@ -454,7 +213,6 @@ export default function Landing() {
             </ul>
           </div>
         </div>
-
         <div className="max-w-7xl mx-auto px-6 mt-12 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-slate-600 text-xs">© 2026 CareerForge AI. All rights reserved.</p>
           <div className="flex items-center gap-6">

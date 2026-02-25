@@ -15,12 +15,16 @@ import CreateCoverLetter from "./pages/CreateCoverLetter";
 import JobOptimizer from "./pages/JobOptimizer";
 import InterviewCoach from "./pages/InterviewCoach";
 import EditResume from "./pages/EditResume";
+import Testimonials from "./pages/Testimonials";
+import Pricing from "./pages/Pricing";
 import NotFound from "./pages/not-found";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Landing} />
+      <Route path="/testimonials" component={Testimonials} />
+      <Route path="/pricing" component={Pricing} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/dashboard" component={DashboardHome} />
 
