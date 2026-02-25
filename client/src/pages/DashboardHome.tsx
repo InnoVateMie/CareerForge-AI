@@ -51,12 +51,6 @@ export default function DashboardHome() {
               Your AI-enhanced career workspace is ready. Design your future today.
             </p>
           </div>
-          <div className="flex items-center gap-3 p-1 rounded-2xl bg-muted/30 backdrop-blur-sm border border-border/10">
-            <div className="px-4 py-2 flex items-center gap-2 text-sm font-medium text-foreground">
-              <Clock className="w-4 h-4 text-primary" />
-              {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
-            </div>
-          </div>
         </motion.div>
 
         {/* Quick Stats */}

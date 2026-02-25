@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { Redirect } from "wouter";
 import { ThemeToggle } from "./ThemeToggle";
+import { Clock } from "./Clock";
 import { DashboardBackground } from "./DashboardBackground";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -41,6 +42,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <h2 className="text-sm font-medium text-muted-foreground hidden md:block">CareerForge Workspace</h2>
             </div>
             <div className="flex items-center gap-4">
+              <div className="hidden lg:block">
+                <Clock />
+              </div>
               <ThemeToggle />
             </div>
           </header>

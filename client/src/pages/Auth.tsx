@@ -29,6 +29,7 @@ export default function AuthPage() {
 
             if (error) throw error;
 
+            console.log(`[auth] ${isLogin ? 'Login' : 'Signup'} successful`);
             if (!isLogin) {
                 toast({
                     title: "Registration successful!",
@@ -38,9 +39,11 @@ export default function AuthPage() {
                 setLocation("/dashboard");
             }
         } catch (error: any) {
+            console.error("[auth] Error details:", error);
+            console.error("[auth] Supabase configured:", isSupabaseConfigured);
             toast({
                 title: "Error",
-                description: error.message,
+                description: error.message || "An unexpected error occurred during authentication.",
                 variant: "destructive",
             });
         } finally {
