@@ -251,13 +251,21 @@ REQUIRED HTML STRUCTURE:
       const input = api.coverLetters.generate.input.parse(req.body);
       console.log("[generate] Input parsed for company:", input.companyName);
 
-      const prompt = `Generate a professional cover letter for the following context:
+      const prompt = `Generate a high-end, professional cover letter for the following context:
 Company Name: ${input.companyName}
 Target Job Role: ${input.jobRole}
 My Skills: ${input.skills}
 My Experience Summary: ${input.experienceSummary}
 
-Format the output in clean HTML suitable for a rich text editor. Make the tone professional, engaging, and directly connecting my skills to the target role. Do not include markdown code block backticks.`;
+Format the output in CLEAN, SEMANTIC HTML using THESE EXACT CLASSES for a Vibrant Premium look:
+1. Wrap everything in <div class="premium-letter">
+2. Header: <div class="letter-header"><h1>[Full Name]</h1><div class="contact-info"><span>[Email]</span> | <span>[Phone]</span> | <span>[LinkedIn/Portfolio]</span></div></div>
+3. Recipient: <div class="recipient-info"><div class="date">[Current Date]</div><div class="manager">Hiring Manager</div><div class="company">${input.companyName}</div></div>
+4. Subject: <div class="letter-subject">RE: Application for ${input.jobRole} Position</div>
+5. Body: Use <p> tags for paragraphs. Make the tone professional and engaging.
+6. Closing: <div class="closing"><p>Best regards,</p><div class="signature-name">[Full Name]</div></div>
+
+[IMPORTANT]: Use placeholders like [Full Name] if not provided in input, but prioritize a professional look. DO NOT include markdown code block backticks.`;
 
       console.log("[generate] Initializing Gemini models...");
       const { model } = getGenAIModels();
@@ -277,13 +285,11 @@ Format the output in clean HTML suitable for a rich text editor. Make the tone p
     } catch (err: any) {
       console.error("[generate] COVER LETTER GENERATE FAILED!");
       console.error("[generate] Error Message:", err?.message);
-      console.error("[generate] Error Stack:", err?.stack);
 
       res.status(500).json({
         message: "Failed to generate cover letter",
         detail: err?.message || String(err),
-        type: err?.name,
-        hint: "Check GOOGLE_GEMINI_API_KEY and model availability."
+        hint: "Check GOOGLE_GEMINI_API_KEY."
       });
     }
   });
@@ -292,19 +298,25 @@ Format the output in clean HTML suitable for a rich text editor. Make the tone p
     try {
       const input = api.resumes.optimize.input.parse(req.body);
 
-      const prompt = `Analyze this resume against the target job description and provide optimization suggestions.
-
-Target Job Description:
-${input.targetJobDescription}
-
-Current Resume:
-${input.existingResume}
-
-Provide your response in JSON format exactly like this:
-{
-  "analysis": "A brief analysis of the match (e.g., 85% match. Good technical skills, missing soft skills.)",
-  "suggestions": "A bulleted list in HTML of actionable suggestions to improve the resume."
-}`;
+      const prompt = `Act as a High-Level Technical Recruiter and Career Strategist. Analyze this resume against the target job description.
+      
+      Target Job Description:
+      ${input.targetJobDescription}
+      
+      Current Resume:
+      ${input.existingResume}
+      
+      Perform a deep gap analysis and provide:
+      1. A detailed match analysis (including a % match score and strengths/weaknesses).
+      2. Specific, actionable suggestions to improve the resume for this exact role (keyword optimization, metric-driven achievements, etc.).
+      
+      Provide your response in JSON format exactly like this:
+      {
+        "analysis": "HTML formatted analysis with <strong>bolding</strong> and structured sections.",
+        "suggestions": "A high-fidelity HTML bulleted list of actionable improvements."
+      }
+      
+      TONE: Professional, insightful, and strategic.`;
 
       const { jsonModel } = getGenAIModels();
       const result = await jsonModel.generateContent(prompt);
@@ -324,21 +336,17 @@ Provide your response in JSON format exactly like this:
     try {
       const { url } = api.jobs.fetch.input.parse(req.body);
 
-      // In a real app, we'd fetch the URL content here.
-      // For this demo/feature preview, we'll ask the AI to "simulate" or we'll provide a placeholder if it's a known site.
-      // But let's try to actually fetch it if possible (some sites block).
-
-      const prompt = `Analyze this job posting URL: ${url}
+      const prompt = `Act as an expert data extractor. Analyze this job posting URL: ${url}
       
       Extract the following information in JSON format:
       {
         "jobTitle": "...",
         "companyName": "...",
-        "requirements": "Bullet points of key requirements...",
-        "description": "Short summary of the role..."
+        "requirements": "Detailed list of technical and soft requirements...",
+        "description": "Comprehensive summary of the role's impact and responsibilities..."
       }
       
-      If you cannot access the URL directly, use your knowledge of typical postings from this domain or provide a generic but high-quality template for a role likely found at that URL.`;
+      If you cannot access the URL directly, provide a generic but EXCEPTIONALLY high-quality template based on the domain.`;
 
       const { jsonModel } = getGenAIModels();
       const result = await jsonModel.generateContent(prompt);
@@ -358,11 +366,12 @@ Provide your response in JSON format exactly like this:
     try {
       const input = api.interview.generateQuestions.input.parse(req.body);
 
-      const prompt = `Act as an expert interviewer. Based on the following resume and job description, generate 5 challenging interview questions.
-      For each question, provide a brief 'context' explaining why you are asking it or what you are looking for.
+      const prompt = `Act as a Senior Hiring Manager for a top-tier tech company. Based on the following resume and job description, generate 5 challenging, behavioral and technical interview questions that test for depth and cultural fit.
       
       Resume: ${input.resumeContent}
       Job Description: ${input.jobDescription}
+      
+      For each question, provide 'context' explaining the specific competency being tested.
       
       Output in JSON format:
       {
@@ -389,13 +398,16 @@ Provide your response in JSON format exactly like this:
     try {
       const input = api.interview.evaluateAnswer.input.parse(req.body);
 
-      const prompt = `Act as an expert interviewer. Evaluate the candidate's answer to the following question.
+      const prompt = `Act as an elite Interview Coach. Evaluate the candidate's answer.
       
       Question: ${input.question}
       Candidate Answer: ${input.answer}
       Original Context: ${input.context}
       
-      Provide feedback, a score out of 10, and an 'improvedAnswer' that would be ideal.
+      Provide:
+      1. CRITICAL feedback using the STAR method where applicable.
+      2. A realistic score (1-10).
+      3. An 'improvedAnswer' that is concise, impactful, and demonstrates executive presence.
       
       Output in JSON format:
       {

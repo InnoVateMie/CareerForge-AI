@@ -389,3 +389,92 @@
 .premium-resume section:nth-of-type(3) .company-info {
   color: #d97706 !important;
 }
+
+/* Vibrant Premium Cover Letter Design System */
+.premium-letter {
+  font-family: 'DM Sans', sans-serif !important;
+  line-height: 1.6 !important;
+  color: #1e293b !important;
+  background: white !important;
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 3rem !important;
+  border-radius: 1rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.premium-letter .letter-header {
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+  margin: -3rem -3rem 3rem -3rem;
+  padding: 3rem;
+  color: white !important;
+  border-radius: 1rem 1rem 0 0;
+  text-align: left;
+}
+
+.premium-letter .letter-header h1 {
+  font-family: var(--font-display) !important;
+  font-size: 2.5rem !important;
+  color: white !important;
+  margin-bottom: 0.5rem !important;
+  font-weight: 800 !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.premium-letter .letter-header .contact-info {
+  font-size: 1rem !important;
+  color: #bfdbfe !important;
+  display: flex !important;
+  gap: 1.5rem !important;
+  flex-wrap: wrap !important;
+}
+
+.premium-letter .recipient-info {
+  margin-bottom: 2.5rem !important;
+  padding-bottom: 1.5rem !important;
+  border-bottom: 2px solid #f1f5f9 !important;
+}
+
+.premium-letter .recipient-info .date {
+  color: #64748b !important;
+  font-size: 0.9rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.premium-letter .recipient-info .manager {
+  font-weight: 700 !important;
+  color: #1e293b !important;
+  font-size: 1.1rem !important;
+}
+
+.premium-letter .recipient-info .company {
+  color: #3b82f6 !important;
+  font-weight: 600 !important;
+}
+
+.premium-letter .letter-subject {
+  font-weight: 800 !important;
+  color: #1e3a8a !important;
+  font-size: 1.25rem !important;
+  margin-bottom: 2rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  border-bottom: none !important;
+}
+
+.premium-letter p {
+  margin-bottom: 1.5rem !important;
+  text-align: justify !important;
+}
+
+.premium-letter .closing {
+  margin-top: 3rem !important;
+}
+
+.premium-letter .signature-name {
+  font-weight: 800 !important;
+  font-size: 1.25rem !important;
+  color: #1e3a8a !important;
+  margin-top: 0.5rem !important;
+}

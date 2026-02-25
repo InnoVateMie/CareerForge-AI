@@ -7,7 +7,7 @@ import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Loader2, Target, CheckCircle2, AlertCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { marked } from "marked";
 
 const formSchema = z.object({
@@ -17,7 +17,7 @@ const formSchema = z.object({
 
 export default function JobOptimizer() {
   const optimizeMutation = useOptimizeResume();
-  const [result, setResult] = useState<{analysisHtml: string, suggestionsHtml: string} | null>(null);
+  const [result, setResult] = useState<{ analysisHtml: string, suggestionsHtml: string } | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -74,8 +74,8 @@ export default function JobOptimizer() {
                   </FormItem>
                 )} />
 
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full h-12 text-lg shadow-lg shadow-blue-500/20 bg-blue-500 hover:bg-blue-600 text-white"
                   disabled={optimizeMutation.isPending}
                 >
@@ -90,35 +90,49 @@ export default function JobOptimizer() {
           </div>
 
           <div className="space-y-6">
-            {result ? (
-              <>
-                <div className="bg-card border border-border shadow-sm rounded-2xl p-6">
-                  <h3 className="text-xl font-bold flex items-center gap-2 mb-4 text-primary">
-                    <CheckCircle2 className="w-5 h-5" /> Match Analysis
-                  </h3>
-                  <div 
-                    className="prose prose-sm dark:prose-invert"
-                    dangerouslySetInnerHTML={{ __html: result.analysisHtml }}
-                  />
-                </div>
-                
-                <div className="bg-card border border-border shadow-sm rounded-2xl p-6">
-                  <h3 className="text-xl font-bold flex items-center gap-2 mb-4 text-accent">
-                    <AlertCircle className="w-5 h-5" /> Suggestions for Improvement
-                  </h3>
-                  <div 
-                    className="prose prose-sm dark:prose-invert"
-                    dangerouslySetInnerHTML={{ __html: result.suggestionsHtml }}
-                  />
-                </div>
-              </>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center p-12 text-center border border-dashed rounded-2xl bg-card/50 text-muted-foreground">
-                <Target className="w-12 h-12 mb-4 opacity-50" />
-                <h3 className="text-lg font-medium text-foreground mb-2">Awaiting Input</h3>
-                <p>Paste your resume and job description to get a detailed gap analysis and tailored keywords.</p>
-              </div>
-            )}
+            <AnimatePresence mode="wait">
+              {result ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-6"
+                >
+                  <div className="bg-card border border-primary/20 shadow-xl shadow-primary/5 rounded-2xl p-7 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110" />
+                    <h3 className="text-xl font-bold flex items-center gap-2 mb-4 text-primary">
+                      <CheckCircle2 className="w-5 h-5" /> Match Analysis
+                    </h3>
+                    <div
+                      className="prose prose-sm dark:prose-invert max-w-none"
+                      dangerouslySetInnerHTML={{ __html: result.analysisHtml }}
+                    />
+                  </div>
+
+                  <div className="bg-card border border-accent/20 shadow-xl shadow-accent/5 rounded-2xl p-7 relative overflow-hidden group">
+                    <div className="absolute bottom-0 left-0 w-32 h-32 bg-accent/5 rounded-full -ml-16 -mb-16 transition-transform group-hover:scale-110" />
+                    <h3 className="text-xl font-bold flex items-center gap-2 mb-4 text-accent">
+                      <AlertCircle className="w-5 h-5" /> Strategic Suggestions
+                    </h3>
+                    <div
+                      className="prose prose-sm dark:prose-invert max-w-none"
+                      dangerouslySetInnerHTML={{ __html: result.suggestionsHtml }}
+                    />
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="h-full min-h-[400px] flex flex-col items-center justify-center p-12 text-center border-2 border-dashed border-muted rounded-2xl bg-muted/20 text-muted-foreground"
+                >
+                  <div className="w-20 h-20 rounded-full bg-background flex items-center justify-center mb-6 shadow-inner">
+                    <Target className="w-10 h-10 opacity-20" />
+                  </div>
+                  <h3 className="text-xl font-bold text-foreground mb-2 font-display">Optimization Engine Idle</h3>
+                  <p className="max-w-xs mx-auto">Upload your credentials and the target role to activate the expert gap-analysis engine.</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>

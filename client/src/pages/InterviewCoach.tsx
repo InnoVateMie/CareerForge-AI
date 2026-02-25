@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { Loader2, MessageSquare, Play, RefreshCw, Send, CheckCircle2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 
@@ -122,63 +123,92 @@ export default function InterviewCoach() {
                     </Card>
                 ) : (
                     <div className="space-y-6">
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-muted-foreground">Question {currentIndex + 1} of {questions.length}</span>
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="flex items-center justify-between"
+                        >
+                            <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                                <span className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                                    {currentIndex + 1}
+                                </span>
+                                Question {currentIndex + 1} of {questions.length}
+                            </span>
                             <Progress value={((currentIndex + 1) / questions.length) * 100} className="w-1/3 h-2" />
-                        </div>
+                        </motion.div>
 
-                        <Card className="border-primary/20 shadow-2xl bg-primary/5">
-                            <CardHeader>
-                                <CardTitle className="text-xl leading-relaxed">"{questions[currentIndex].question}"</CardTitle>
-                                <CardDescription className="italic mt-2">Interviewer Context: {questions[currentIndex].context}</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <Textarea
-                                    placeholder="Type your answer here..."
-                                    className="min-h-[150px] text-lg bg-background"
-                                    value={answer}
-                                    onChange={e => setAnswer(e.target.value)}
-                                    disabled={!!feedback}
-                                />
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={currentIndex}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 1.05 }}
+                                transition={{ duration: 0.4 }}
+                            >
+                                <Card className="border-primary/20 shadow-2xl bg-gradient-to-br from-primary/5 via-background to-accent/5 overflow-hidden relative group">
+                                    <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32 transition-transform group-hover:scale-110" />
+                                    <CardHeader className="relative z-10">
+                                        <CardTitle className="text-2xl leading-relaxed text-foreground font-display">
+                                            "{questions[currentIndex].question}"
+                                        </CardTitle>
+                                        <CardDescription className="italic mt-3 text-primary/70 font-medium">
+                                            Interviewer Focus: {questions[currentIndex].context}
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4 relative z-10">
+                                        <Textarea
+                                            placeholder="Articulate your best answer here..."
+                                            className="min-h-[180px] text-lg bg-background/50 backdrop-blur-sm border-2 border-muted focus:border-primary transition-all shadow-inner"
+                                            value={answer}
+                                            onChange={e => setAnswer(e.target.value)}
+                                            disabled={!!feedback}
+                                        />
 
-                                {feedback && (
-                                    <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-                                        <div className={`p-4 rounded-xl border ${feedback.score >= 7 ? 'bg-green-500/10 border-green-500/20' : 'bg-yellow-500/10 border-yellow-500/20'}`}>
-                                            <div className="flex items-center justify-between mb-2">
-                                                <span className="font-bold flex items-center gap-2">
-                                                    <CheckCircle2 className={`h-5 w-5 ${feedback.score >= 7 ? 'text-green-500' : 'text-yellow-500'}`} />
-                                                    AI Feedback (Score: {feedback.score}/10)
-                                                </span>
-                                            </div>
-                                            <p className="text-sm mb-4">{feedback.feedback}</p>
+                                        {feedback && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 30 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className="animate-in fade-in slide-in-from-top-4 duration-500"
+                                            >
+                                                <div className={`p-6 rounded-2xl border-2 transition-all ${feedback.score >= 7 ? 'bg-green-500/5 border-green-500/20 shadow-xl shadow-green-500/5' : 'bg-yellow-500/5 border-yellow-500/20 shadow-xl shadow-yellow-500/5'}`}>
+                                                    <div className="flex items-center justify-between mb-4">
+                                                        <span className="font-bold text-lg flex items-center gap-3">
+                                                            <div className={`p-2 rounded-lg ${feedback.score >= 7 ? 'bg-green-500/20 text-green-500' : 'bg-yellow-500/20 text-yellow-500'}`}>
+                                                                <CheckCircle2 className="h-6 w-6" />
+                                                            </div>
+                                                            Expert Evaluation (Score: {feedback.score}/10)
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-md leading-relaxed text-foreground/80 mb-6">{feedback.feedback}</p>
 
-                                            <div className="space-y-2">
-                                                <span className="text-xs font-bold uppercase text-muted-foreground tracking-wider">Better way to say it:</span>
-                                                <div className="p-3 bg-background/50 rounded-lg text-sm italic">
-                                                    {feedback.improvedAnswer}
+                                                    <div className="space-y-3 bg-background/40 p-5 rounded-xl border border-border/50">
+                                                        <span className="text-xs font-black uppercase text-primary tracking-[0.2em]">The Golden Response:</span>
+                                                        <div className="p-4 bg-primary/5 rounded-lg text-md italic border-l-4 border-primary text-foreground/90">
+                                                            {feedback.improvedAnswer}
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </CardContent>
-                            <CardFooter className="flex justify-between gap-4">
-                                <Button variant="outline" onClick={() => setQuestions([])} className="gap-2">
-                                    <RefreshCw className="h-4 w-4" /> Reset
-                                </Button>
+                                            </motion.div>
+                                        )}
+                                    </CardContent>
+                                    <CardFooter className="flex justify-between gap-4 pt-6 border-t border-border/50 relative z-10">
+                                        <Button variant="outline" onClick={() => setQuestions([])} className="gap-2 h-11 px-6 hover:bg-muted transition-colors">
+                                            <RefreshCw className="h-4 w-4" /> Reset Session
+                                        </Button>
 
-                                {!feedback ? (
-                                    <Button onClick={handleSubmitAnswer} disabled={!answer || evaluateMutation.isPending} className="gap-2 px-8">
-                                        {evaluateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                                        Submit Answer
-                                    </Button>
-                                ) : (
-                                    <Button onClick={handleNext} className="gap-2 px-8">
-                                        {currentIndex < questions.length - 1 ? 'Next Question' : 'Finish Session'}
-                                    </Button>
-                                )}
-                            </CardFooter>
-                        </Card>
+                                        {!feedback ? (
+                                            <Button onClick={handleSubmitAnswer} disabled={!answer || evaluateMutation.isPending} className="gap-2 h-11 px-10 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-white font-bold">
+                                                {evaluateMutation.isPending ? <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing...</> : <><Send className="h-4 w-4" /> Submit for Review</>}
+                                            </Button>
+                                        ) : (
+                                            <Button onClick={handleNext} className="gap-2 h-11 px-10 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-white font-bold">
+                                                {currentIndex < questions.length - 1 ? 'Next Question' : 'Seal the Deal'}
+                                            </Button>
+                                        )}
+                                    </CardFooter>
+                                </Card>
+                            </motion.div>
+                        </AnimatePresence>
                     </div>
                 )}
             </div>
