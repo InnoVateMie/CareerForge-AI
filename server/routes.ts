@@ -165,54 +165,95 @@ export async function registerRoutes(
 
       const prompt = `Generate a high-end, professional resume for:
 Name: ${input.fullName}
+Email: ${input.email}
+Phone: ${input.phone}
+Address: ${input.address}
 Job Title: ${input.jobTitle}
 Skills: ${input.skills}
-Work Experience: ${input.workExperience}
-Education: ${input.education}
-${input.certifications ? `Certifications: ${input.certifications}` : ''}
+Hobbies: ${input.hobbies || 'Not specified'}
+
+Work Experience Summary:
+${input.workExperience.map(exp => `- ${exp.role} at ${exp.company} (${exp.start} - ${exp.end}): ${exp.description}`).join('\n')}
+
+Education Summary:
+${input.education.map(edu => `- ${edu.degree} from ${edu.school} (${edu.start} - ${edu.end})`).join('\n')}
+
+${input.certifications && input.certifications.length > 0 ? `Certifications:
+${input.certifications.map(cert => `- ${cert.name} (${cert.issuer}, ${cert.date})`).join('\n')}` : ''}
+
 ${input.targetJobDescription ? `Target Job Description: ${input.targetJobDescription}` : ''}
 
 CRITICAL INSTRUCTIONS:
 1. Use semantic HTML5 only (Header, Section, Main).
-2. Use specific class names for styling: 
-   - Wrap the whole content in <div class="premium-resume">
-   - HEADER: Use <header class="resume-header"><h1>NAME</h1><div class="subtitle">JOB TITLE | CONTACT</div></header>
-   - SECTIONS: Use <section> with <h2> headers
-   - SKILLS: Use a <table class="skills-table"> where each row is <tr><td class="category">CATEGORY_NAME</td><td class="items">SKILL1, SKILL2...</td></tr>
-   - EXPERIENCE: Each job must be in an <div class="exp-item">
-     - Job Header: <div class="exp-header"><span>ROLE</span><span class="date">DATE</span></div>
-     - Company Info: <div class="company-info"><span>COMPANY NAME</span><span>LOCATION</span></div>
-     - Accomplishments: Use <ul> and <li> for STAR method achievements.
-3. Content Quality: Focus on high-impact, measurable achievements.
-4. Output raw HTML only. Do NOT include markdown code blocks or backticks.
+2. Content Quality: Focus on high-impact, measurable achievements using the STAR method.
+3. Output raw HTML only. Do NOT include markdown code blocks, backticks, or inline <style> tags.
+4. Structure must strictly follow the REQUIRED HTML STRUCTURE below.
+5. DESIGN VARIETY: 
+   - Use <div class="boxed-title"> for dynamic section headers (Professional Summary, Experience, etc.) to give a premium boxed feel.
+   - Use <table class="data-table"> for Education and Certifications to show structured data clearly.
+   - Use <table class="skills-table"> for Technical Expertise.
+   - Randomly decide for THIS user if they should have a "Summary Table" or a "Summary Box" at the top.
 
 REQUIRED HTML STRUCTURE:
 <div class="premium-resume">
   <header class="resume-header">
-    <h1>NAME</h1>
-    <div class="subtitle">JOB TITLE | LOCATION | EMAIL | PHONE</div>
+    <h1>${input.fullName}</h1>
+    <div class="subtitle">${input.jobTitle.toUpperCase()}</div>
+    <div class="contact-line">${input.email} | ${input.phone} | ${input.address}</div>
   </header>
   
   <section>
-    <h2>Professional Summary</h2>
-    <p>SUMMARY_TEXT</p>
+    <div class="boxed-title"><h2>Professional Summary</h2></div>
+    <p>A compelling 3-4 sentence professional summary focusing on expertise and value proposition.</p>
   </section>
 
   <section>
-    <h2>Technical Expertise</h2>
+    <div class="boxed-title"><h2>Technical Expertise</h2></div>
     <table class="skills-table">
-      <tr><td class="category">Frontend</td><td class="items">React, Next.js, etc.</td></tr>
+      <tr><td class="category">Core Competencies</td><td class="items">${input.skills}</td></tr>
     </table>
   </section>
 
   <section>
-    <h2>Work Experience</h2>
+    <div class="boxed-title"><h2>Professional Experience</h2></div>
+    ${input.workExperience.map(exp => `
     <div class="exp-item">
-      <div class="exp-header"><span>ROLE</span><span class="date">DATE</span></div>
-      <div class="company-info"><span>COMPANY</span><span>LOCATION</span></div>
-      <ul><li>ACHIEVEMENT</li></ul>
-    </div>
+      <div class="exp-header"><span>${exp.role.toUpperCase()}</span><span class="date">${exp.start} – ${exp.end}</span></div>
+      <div class="company-info"><span>${exp.company}</span></div>
+      <ul>
+        <li>ACHIEVEMENT: Quantifiable result using STAR method.</li>
+      </ul>
+    </div>`).join('')}
   </section>
+
+  <section>
+    <div class="boxed-title"><h2>Academic Background</h2></div>
+    <table class="data-table">
+      ${input.education.map(edu => `
+      <tr>
+        <td class="main-info"><strong>${edu.degree}</strong><br/>${edu.school}</td>
+        <td class="side-info">${edu.start} – ${edu.end}</td>
+      </tr>`).join('')}
+    </table>
+  </section>
+
+  ${input.certifications && input.certifications.length > 0 ? `
+  <section>
+    <div class="boxed-title"><h2>Certifications</h2></div>
+    <table class="data-table">
+      ${input.certifications.map(cert => `
+      <tr>
+        <td class="main-info"><strong>${cert.name}</strong><br/>${cert.issuer}</td>
+        <td class="side-info">${cert.date}</td>
+      </tr>`).join('')}
+    </table>
+  </section>` : ''}
+
+  ${input.hobbies ? `
+  <section>
+    <div class="boxed-title"><h2>Interests & Hobbies</h2></div>
+    <p>${input.hobbies}</p>
+  </section>` : ''}
 </div>`;
 
       console.log("[generate] Initializing Gemini models...");

@@ -71,11 +71,30 @@ export const api = {
       path: "/api/resumes/generate" as const,
       input: z.object({
         fullName: z.string(),
+        email: z.string(),
+        phone: z.string(),
+        address: z.string(),
         jobTitle: z.string(),
         skills: z.string(),
-        workExperience: z.string(),
-        education: z.string(),
-        certifications: z.string().optional(),
+        hobbies: z.string().optional(),
+        workExperience: z.array(z.object({
+          company: z.string(),
+          role: z.string(),
+          start: z.string(),
+          end: z.string(),
+          description: z.string(),
+        })),
+        education: z.array(z.object({
+          school: z.string(),
+          degree: z.string(),
+          start: z.string(),
+          end: z.string(),
+        })),
+        certifications: z.array(z.object({
+          name: z.string(),
+          issuer: z.string(),
+          date: z.string(),
+        })).optional(),
         targetJobDescription: z.string().optional(),
       }),
       responses: {

@@ -195,18 +195,20 @@
 
 /* Header Section */
 .premium-resume .resume-header {
-  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+  border-left: 8px solid var(--resume-primary, #3b82f6);
+  background: var(--resume-bg, #f8fafc);
   margin: -3rem -3rem 2rem -3rem;
   padding: 3rem;
-  color: white !important;
+  color: var(--foreground) !important;
   border-radius: 1rem 1rem 0 0;
-  text-align: center;
+  text-align: left;
 }
 
 .premium-resume .resume-header h1 {
   font-family: var(--font-display);
   font-size: 3rem !important;
-  color: white !important;
+  color: #0f172a !important;
+  /* Always dark for maximum visibility */
   margin-bottom: 0.75rem !important;
   font-weight: 800 !important;
   letter-spacing: -0.02em;
@@ -216,21 +218,28 @@
 
 .premium-resume .resume-header .subtitle {
   font-size: 1.1rem !important;
-  color: #bfdbfe !important;
-  margin-bottom: 0 !important;
+  color: var(--resume-primary, #3b82f6) !important;
+  margin-bottom: 0.25rem !important;
   font-style: normal !important;
+  font-weight: 700;
+  text-align: left;
+}
+
+.premium-resume .resume-header .contact-line {
+  font-size: 0.9rem !important;
+  color: var(--muted-foreground) !important;
+  opacity: 0.8;
   font-weight: 500;
-  text-align: center;
 }
 
 /* Section Styling */
 .premium-resume h2 {
   font-family: var(--font-display) !important;
   font-size: 1.5rem !important;
-  color: #1d4ed8 !important;
+  color: var(--resume-primary, #1d4ed8) !important;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  border-bottom: 3px solid #60a5fa !important;
+  border-bottom: 3px solid var(--resume-muted, #60a5fa) !important;
   margin-top: 2.5rem !important;
   margin-bottom: 1.5rem !important;
   padding-bottom: 0.5rem !important;
@@ -244,15 +253,15 @@
   display: inline-block;
   width: 12px;
   height: 12px;
-  background: #3b82f6;
+  background: var(--resume-primary, #3b82f6);
   margin-right: 12px;
   border-radius: 2px;
 }
 
 /* Experience Cards */
 .premium-resume .exp-item {
-  background: #f8fafc !important;
-  border-left: 4px solid #3b82f6 !important;
+  background: var(--resume-muted-bg, #f8fafc) !important;
+  border-left: 4px solid var(--resume-primary, #3b82f6) !important;
   padding: 1.5rem !important;
   margin-bottom: 1.5rem !important;
   border-radius: 0 0.75rem 0.75rem 0;
@@ -270,7 +279,7 @@
 }
 
 .premium-resume .company-info {
-  color: #2563eb !important;
+  color: var(--resume-primary, #2563eb) !important;
   margin-bottom: 1rem !important;
   font-weight: 600 !important;
   font-size: 1.05rem !important;
@@ -295,7 +304,7 @@
 
 .premium-resume .skills-table .category {
   font-weight: 700 !important;
-  color: #1e40af !important;
+  color: var(--resume-primary, #1e40af) !important;
   width: 30%;
   border-right: 2px solid #e2e8f0;
 }
@@ -336,58 +345,70 @@
 .premium-resume .date {
   font-family: var(--font-display) !important;
   font-size: 0.95rem !important;
-  color: #1d4ed8 !important;
-  background: #dbeafe;
+  color: var(--resume-primary, #1d4ed8) !important;
+  background: var(--resume-muted, #dbeafe);
   padding: 0.25rem 0.75rem;
   border-radius: 2rem;
   font-weight: 700 !important;
 }
 
-/* Alternate Colors for Sections */
-.premium-resume section:nth-of-type(2) h2 {
-  color: #059669 !important;
-  border-bottom-color: #34d399 !important;
+.boxed-title {
+  background: var(--resume-primary, #3b82f6);
+  color: white !important;
+  padding: 0.5rem 1.5rem;
+  display: inline-block;
+  border-radius: 0.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.premium-resume section:nth-of-type(2) h2::before {
-  background: #10b981;
+.boxed-title h2 {
+  margin: 0 !important;
+  padding: 0 !important;
+  color: white !important;
+  font-size: 1.1rem !important;
+  border: none !important;
 }
 
-.premium-resume section:nth-of-type(2) .exp-item {
-  border-left-color: #10b981 !important;
-  background: #ecfdf5 !important;
+.boxed-title h2::before {
+  display: none !important;
 }
 
-.premium-resume section:nth-of-type(2) .date {
-  color: #059669 !important;
-  background: #d1fae5;
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
 }
 
-.premium-resume section:nth-of-type(2) .company-info {
-  color: #059669 !important;
+.data-table td {
+  padding: 0.75rem 0;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
 }
 
-.premium-resume section:nth-of-type(3) h2 {
-  color: #d97706 !important;
-  border-bottom-color: #fbbf24 !important;
+.data-table tr:last-child td {
+  border-bottom: none;
 }
 
-.premium-resume section:nth-of-type(3) h2::before {
-  background: #f59e0b;
+.data-table .main-info {
+  text-align: left;
 }
 
-.premium-resume section:nth-of-type(3) .exp-item {
-  border-left-color: #f59e0b !important;
-  background: #fffbeb !important;
+.data-table .side-info {
+  text-align: right;
+  font-weight: 700;
+  color: var(--resume-primary);
+  font-size: 0.9rem;
 }
 
-.premium-resume section:nth-of-type(3) .date {
-  color: #d97706 !important;
-  background: #fef3c7;
+.resume-actions-container {
+  @apply flex gap-3 pb-2 mb-4 overflow-x-auto overflow-y-hidden items-center;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-.premium-resume section:nth-of-type(3) .company-info {
-  color: #d97706 !important;
+.resume-actions-container::-webkit-scrollbar {
+  display: none;
 }
 
 /* Vibrant Premium Cover Letter Design System */
