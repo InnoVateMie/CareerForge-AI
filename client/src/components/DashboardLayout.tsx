@@ -35,16 +35,20 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <div className="flex h-screen w-full bg-transparent overflow-hidden relative">
         <AppSidebar />
         <div className="flex flex-col flex-1 min-w-0">
-          <header className="flex h-16 items-center justify-between px-6 border-b border-border/10 bg-background/50 backdrop-blur-md z-20 sticky top-0">
-            <div className="flex items-center gap-4">
-              <SidebarTrigger className="text-muted-foreground hover:text-foreground transition-all duration-300" />
-              <div className="h-6 w-[1px] bg-border/50 mx-2 hidden md:block" />
-              <h2 className="text-sm font-medium text-muted-foreground hidden md:block">CareerForge Workspace</h2>
+          <header className="flex h-16 md:h-20 items-center justify-between px-4 md:px-8 border-b border-border/10 bg-background/40 backdrop-blur-xl z-20 sticky top-0">
+            <div className="flex items-center gap-3 md:gap-4 font-display">
+              <SidebarTrigger className="h-10 w-10 text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-300 rounded-xl" />
+              <div className="h-6 w-[1px] bg-border/20 mx-1 hidden md:block" />
+              <div className="flex flex-col md:flex-row md:items-center md:gap-2">
+                <h2 className="text-sm font-bold text-foreground md:text-muted-foreground md:font-medium tracking-tight">CareerForge</h2>
+                <span className="text-[10px] md:text-xs font-black text-primary/80 uppercase tracking-widest md:hidden">AI Forge</span>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="hidden lg:block">
+            <div className="flex items-center gap-2 md:gap-6">
+              <div className="hidden sm:block">
                 <Clock />
               </div>
+              <div className="h-8 w-[1px] bg-border/10 mx-2 hidden md:block" />
               <ThemeToggle />
             </div>
           </header>

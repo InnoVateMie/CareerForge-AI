@@ -7,7 +7,7 @@ import { useResumes } from "@/hooks/use-resumes";
 import { useCoverLetters } from "@/hooks/use-cover-letters";
 import { useAuth } from "@/hooks/use-auth";
 import { Resume3DPreview } from "@/components/Resume3DPreview";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { formatDateTime } from "@/lib/utils";
 
 const container = {
@@ -29,9 +29,10 @@ export default function DashboardHome() {
   const { data: resumes } = useResumes();
   const { data: coverLetters } = useCoverLetters();
   const { user } = useAuth();
-
-  // Extract username from email (e.g., user@gmail.com -> user)
-  const displayName = user?.email?.split('@')[0] || "Professional";
+  // Robust name detection: Prioritize full name from metadata, then split email
+  const userInitials = user?.email?.charAt(0).toUpperCase() || "P";
+  const rawDisplayName = user?.user_metadata?.full_name || user?.user_metadata?.first_name || user?.email?.split('@')[0];
+  const displayName = rawDisplayName || "Professional";
 
   // Dynamic Success Rate: 70% baseline + activity boost
   const resumeCount = resumes?.length || 0;
@@ -54,10 +55,20 @@ export default function DashboardHome() {
       >
         {/* Welcome Header */}
         <motion.div variants={item} className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold font-display tracking-tight text-foreground">
-              Welcome, <span className="text-gradient capitalize">{displayName}</span>
-            </h1>
+          <div className="relative">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={displayName}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              >
+                <h1 className="text-4xl md:text-5xl font-bold font-display tracking-tight text-foreground">
+                  Welcome, <span className="text-gradient capitalize">{displayName}</span>
+                </h1>
+              </motion.div>
+            </AnimatePresence>
             <p className="text-muted-foreground mt-3 text-lg font-light max-w-xl">
               Your AI-enhanced career workspace is ready. Design your future today.
             </p>
