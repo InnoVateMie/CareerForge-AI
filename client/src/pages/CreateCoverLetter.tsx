@@ -8,11 +8,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Loader2, Mail, Download, Save } from "lucide-react";
+import { Loader2, Mail, Download, Save, ArrowLeft } from "lucide-react";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { marked } from "marked";
 // @ts-ignore
 import html2pdf_lib from "html2pdf.js";
 const html2pdf = html2pdf_lib as any;
@@ -49,7 +48,6 @@ export default function CreateCoverLetter() {
     try {
       setTitle(`Cover Letter - ${values.companyName}`);
       const result = await generateMutation.mutateAsync(values);
-      // AI now returns high-fidelity HTML directly. Removing redundant marked.parse.
       setGeneratedHtml(result.content);
       setStep("edit");
       toast({ title: "Cover letter generated successfully!" });
@@ -59,44 +57,43 @@ export default function CreateCoverLetter() {
   };
 
   const handleSave = async () => {
-    console.log("[save] handleSave triggered. Title:", title);
     if (!title) {
       toast({ title: "Please enter a title", variant: "destructive" });
       return;
     }
     try {
-      console.log("[save] Sending payload to createMutation...");
-      await createMutation.mutateAsync({
-        title,
-        content: generatedHtml,
-      });
-      console.log("[save] Save mutation successful.");
+      await createMutation.mutateAsync({ title, content: generatedHtml });
       toast({ title: "Saved successfully!" });
       setLocation("/dashboard/cover-letters");
     } catch (e: any) {
-      console.error("[save] Save failed:", e?.message || e);
       toast({ title: "Save failed", variant: "destructive" });
     }
   };
 
   const handleExportPDF = () => {
     if (!letterEditorRef.current) return;
-    const element = letterEditorRef.current;
     const opt = {
       margin: 20,
-      filename: `${title || 'cover-letter'}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      filename: `${title || "cover-letter"}.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
     };
-    html2pdf().set(opt).from(element).save();
+    html2pdf().set(opt).from(letterEditorRef.current).save();
   };
 
   return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-3xl mx-auto px-4 md:px-0">
         {step === "form" ? (
           <>
+            {/* Mobile: back to dashboard */}
+            <div className="flex items-center gap-2 mb-4 md:hidden">
+              <Button variant="ghost" size="sm" onClick={() => setLocation("/dashboard")} className="gap-1 text-muted-foreground -ml-2">
+                <ArrowLeft className="h-4 w-4" /> Dashboard
+              </Button>
+            </div>
+
             <div className="mb-8 text-center">
               <div className="inline-flex h-12 w-12 rounded-xl bg-accent/10 items-center justify-center text-accent mb-4">
                 <Mail className="h-6 w-6" />
@@ -136,7 +133,9 @@ export default function CreateCoverLetter() {
                   <FormField control={form.control} name="experienceSummary" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Why are you a great fit?</FormLabel>
-                      <FormControl><Textarea className="min-h-[150px]" placeholder="I have 5 years of experience leading cross-functional teams..." {...field} /></FormControl>
+                      <FormControl>
+                        <Textarea className="min-h-[150px]" placeholder="I have 5 years of experience leading cross-functional teams..." {...field} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
@@ -158,16 +157,17 @@ export default function CreateCoverLetter() {
           </>
         ) : (
           <>
-            <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h1 className="text-2xl font-bold font-display text-foreground">Review & Edit</h1>
+                <h1 className="text-2xl font-bold font-display text-foreground">Review &amp; Edit</h1>
               </div>
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setStep("form")}>Back</Button>
-                <Button variant="secondary" onClick={handleExportPDF} className="gap-2">
+              {/* Mobile-friendly action row with horizontal scroll */}
+              <div className="resume-actions-container">
+                <Button variant="outline" onClick={() => setStep("form")} className="whitespace-nowrap h-11 rounded-xl">Back</Button>
+                <Button variant="secondary" onClick={handleExportPDF} className="gap-2 whitespace-nowrap h-11 rounded-xl">
                   <Download className="w-4 h-4" /> Export PDF
                 </Button>
-                <Button onClick={handleSave} disabled={createMutation.isPending} className="gap-2 bg-accent hover:bg-accent/90 text-white">
+                <Button onClick={handleSave} disabled={createMutation.isPending} className="gap-2 bg-accent hover:bg-accent/90 text-white whitespace-nowrap h-11 rounded-xl">
                   {createMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   Save
                 </Button>
@@ -175,19 +175,21 @@ export default function CreateCoverLetter() {
             </div>
 
             <div className="mb-6">
-              <label className="text-sm font-medium mb-2 block">Document Title</label>
+              <label className="text-sm font-semibold mb-2 block text-muted-foreground uppercase tracking-wider">Document Title</label>
               <Input
                 value={title}
-                onChange={e => setTitle(e.target.value)}
-                className="max-w-md font-medium text-lg"
+                onChange={(e) => setTitle(e.target.value)}
+                className="max-w-md font-medium text-lg h-12 rounded-2xl"
               />
             </div>
 
-            <RichTextEditor
-              content={generatedHtml}
-              onChange={setGeneratedHtml}
-              editorRef={letterEditorRef}
-            />
+            <div className="rounded-2xl border border-border overflow-hidden shadow-xl">
+              <RichTextEditor
+                content={generatedHtml}
+                onChange={setGeneratedHtml}
+                editorRef={letterEditorRef}
+              />
+            </div>
           </>
         )}
       </div>

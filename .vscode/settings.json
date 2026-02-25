@@ -1,0 +1,13 @@
+{
+    "css.customData": [],
+    "css.validate": false,
+    "scss.validate": false,
+    "less.validate": false,
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "never"
+    },
+    "tailwindCSS.includeLanguages": {
+        "typescript": "javascript",
+        "typescriptreact": "javascript"
+    }
+}

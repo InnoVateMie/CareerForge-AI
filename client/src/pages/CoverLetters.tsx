@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Plus, Mail, Trash2, Edit } from "lucide-react";
-import { Link } from "wouter";
+import { Plus, Mail, Trash2, Edit, ArrowLeft } from "lucide-react";
+import { Link, useLocation } from "wouter";
 import { useCoverLetters, useDeleteCoverLetter } from "@/hooks/use-cover-letters";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -22,6 +22,7 @@ export default function CoverLetters() {
   const { data: letters, isLoading } = useCoverLetters();
   const deleteMutation = useDeleteCoverLetter();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   const handleDelete = async (id: number) => {
     try {
@@ -34,6 +35,12 @@ export default function CoverLetters() {
 
   return (
     <DashboardLayout>
+      {/* Mobile: back to dashboard */}
+      <div className="flex items-center gap-2 mb-4 md:hidden">
+        <Button variant="ghost" size="sm" onClick={() => setLocation("/dashboard")} className="gap-1 text-muted-foreground -ml-2">
+          <ArrowLeft className="h-4 w-4" /> Dashboard
+        </Button>
+      </div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold font-display text-foreground">Cover Letters</h1>

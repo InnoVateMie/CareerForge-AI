@@ -54,8 +54,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <ThemeToggle />
             </div>
           </header>
-          <main className="flex-1 overflow-auto bg-muted/5 relative">
-            <div className="max-w-7xl mx-auto w-full p-6 md:p-10">
+          <main className="flex-1 overflow-y-auto overflow-x-hidden bg-muted/5 relative">
+            <div className="max-w-7xl mx-auto w-full p-4 md:p-10">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={window.location.pathname}

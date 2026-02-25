@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { marked } from "marked";
+import { Target, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 
 const formSchema = z.object({
   existingResume: z.string().min(50, "Please paste your full resume content"),

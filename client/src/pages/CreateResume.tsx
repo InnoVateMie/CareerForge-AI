@@ -8,7 +8,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Loader2, Wand2, Download, Save, FileText, Plus, Trash2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, Wand2, Download, Save, FileText, Plus, Trash2, ArrowLeft } from "lucide-react";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -17,6 +18,39 @@ import { JobFetcher } from "@/components/JobFetcher";
 // @ts-ignore
 import html2pdf_lib from "html2pdf.js";
 const html2pdf = html2pdf_lib as any;
+
+const COUNTRY_CODES = [
+  { code: "+1", country: "US/CA" }, { code: "+7", country: "RU" },
+  { code: "+20", country: "EG" }, { code: "+27", country: "ZA" },
+  { code: "+30", country: "GR" }, { code: "+31", country: "NL" },
+  { code: "+32", country: "BE" }, { code: "+33", country: "FR" },
+  { code: "+34", country: "ES" }, { code: "+39", country: "IT" },
+  { code: "+40", country: "RO" }, { code: "+41", country: "CH" },
+  { code: "+44", country: "GB" }, { code: "+45", country: "DK" },
+  { code: "+46", country: "SE" }, { code: "+47", country: "NO" },
+  { code: "+48", country: "PL" }, { code: "+49", country: "DE" },
+  { code: "+51", country: "PE" }, { code: "+52", country: "MX" },
+  { code: "+54", country: "AR" }, { code: "+55", country: "BR" },
+  { code: "+56", country: "CL" }, { code: "+57", country: "CO" },
+  { code: "+58", country: "VE" }, { code: "+60", country: "MY" },
+  { code: "+61", country: "AU" }, { code: "+62", country: "ID" },
+  { code: "+63", country: "PH" }, { code: "+64", country: "NZ" },
+  { code: "+65", country: "SG" }, { code: "+66", country: "TH" },
+  { code: "+81", country: "JP" }, { code: "+82", country: "KR" },
+  { code: "+84", country: "VN" }, { code: "+86", country: "CN" },
+  { code: "+90", country: "TR" }, { code: "+91", country: "IN" },
+  { code: "+92", country: "PK" }, { code: "+94", country: "LK" },
+  { code: "+98", country: "IR" }, { code: "+212", country: "MA" },
+  { code: "+213", country: "DZ" }, { code: "+216", country: "TN" },
+  { code: "+218", country: "LY" }, { code: "+220", country: "GM" },
+  { code: "+221", country: "SN" }, { code: "+233", country: "GH" },
+  { code: "+234", country: "NG" }, { code: "+237", country: "CM" },
+  { code: "+254", country: "KE" }, { code: "+255", country: "TZ" },
+  { code: "+256", country: "UG" }, { code: "+260", country: "ZM" },
+  { code: "+263", country: "ZW" }, { code: "+966", country: "SA" },
+  { code: "+971", country: "AE" }, { code: "+972", country: "IL" },
+  { code: "+974", country: "QA" }, { code: "+234", country: "NG" },
+];
 
 const formSchema = z.object({
   fullName: z.string().min(2, "Name is required"),
@@ -171,12 +205,19 @@ export default function CreateResume() {
       <div className="max-w-4xl mx-auto">
         {step === "form" ? (
           <>
-            <div className="mb-8 text-center px-4">
-              <div className="inline-flex h-12 w-12 rounded-xl bg-primary/10 items-center justify-center text-primary mb-4">
-                <Wand2 className="h-6 w-6" />
+            <div className="mb-8 px-4">
+              <div className="flex items-center gap-3 mb-6 md:hidden">
+                <Button variant="ghost" size="sm" onClick={() => setLocation("/dashboard")} className="gap-1 text-muted-foreground hover:text-foreground -ml-2">
+                  <ArrowLeft className="h-4 w-4" /> Dashboard
+                </Button>
               </div>
-              <h1 className="text-3xl font-bold font-display text-foreground">AI Resume Generator</h1>
-              <p className="text-muted-foreground mt-2">Craft a world-class professional narrative with our evolved AI.</p>
+              <div className="text-center">
+                <div className="inline-flex h-12 w-12 rounded-xl bg-primary/10 items-center justify-center text-primary mb-4">
+                  <Wand2 className="h-6 w-6" />
+                </div>
+                <h1 className="text-3xl font-bold font-display text-foreground">AI Resume Generator</h1>
+                <p className="text-muted-foreground mt-2">Craft a world-class professional narrative with our evolved AI.</p>
+              </div>
             </div>
 
             <div className="bg-card border border-border shadow-2xl shadow-black/5 rounded-3xl p-6 md:p-10 mb-10">
@@ -205,8 +246,39 @@ export default function CreateResume() {
                       )} />
                       <FormField control={form.control} name="phone" render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Phone (with country code)</FormLabel>
-                          <FormControl><Input placeholder="+234..." {...field} /></FormControl>
+                          <FormLabel>Phone Number</FormLabel>
+                          <FormControl>
+                            <div className="flex gap-2">
+                              <Select
+                                defaultValue="+234"
+                                onValueChange={(code) => {
+                                  const num = field.value.replace(/^\+\d+\s*/, '');
+                                  field.onChange(`${code} ${num}`);
+                                }}
+                              >
+                                <SelectTrigger className="w-[110px] shrink-0">
+                                  <SelectValue placeholder="+Code" />
+                                </SelectTrigger>
+                                <SelectContent className="max-h-60">
+                                  {COUNTRY_CODES.map((c) => (
+                                    <SelectItem key={`${c.code}-${c.country}`} value={c.code}>
+                                      {c.code} {c.country}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <Input
+                                placeholder="801 234 5678"
+                                className="flex-1"
+                                value={field.value.replace(/^\+\d+\s*/, '')}
+                                onChange={(e) => {
+                                  const parts = field.value.split(' ');
+                                  const code = parts[0]?.startsWith('+') ? parts[0] : '+234';
+                                  field.onChange(`${code} ${e.target.value}`);
+                                }}
+                              />
+                            </div>
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )} />
