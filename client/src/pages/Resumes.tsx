@@ -16,6 +16,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { formatDateTime } from "@/lib/utils";
 
 export default function Resumes() {
   const { data: resumes, isLoading } = useResumes();
@@ -69,16 +70,16 @@ export default function Resumes() {
               </div>
               <h3 className="text-xl font-bold text-foreground mb-2 line-clamp-1">{resume.title}</h3>
               <p className="text-sm text-muted-foreground mb-6">
-                Created {new Date(resume.createdAt!).toLocaleDateString()}
+                Created {formatDateTime(resume.createdAt!)}
               </p>
-              
+
               <div className="mt-auto flex items-center gap-2 pt-4 border-t border-border/50">
                 <Button asChild variant="secondary" className="flex-1">
                   <Link href={`/dashboard/resumes/${resume.id}`}>
                     <Edit className="w-4 h-4 mr-2" /> Edit
                   </Link>
                 </Button>
-                
+
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10">

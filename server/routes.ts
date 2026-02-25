@@ -249,7 +249,7 @@ REQUIRED HTML STRUCTURE:
     try {
       console.log("[generate] Parsing input...");
       const input = api.coverLetters.generate.input.parse(req.body);
-      console.log("[generate] Input parsed for job role:", input.jobRole);
+      console.log("[generate] Input parsed for company:", input.companyName);
 
       const prompt = `Generate a professional cover letter for the following context:
 Company Name: ${input.companyName}
@@ -264,20 +264,26 @@ Format the output in clean HTML suitable for a rich text editor. Make the tone p
       console.log("[generate] Gemini model initialized. Calling AI...");
 
       const result = await model.generateContent(prompt);
-      console.log("[generate] AI response received.");
+      console.log("[generate] AI request sent, waiting for response...");
 
       const response = await result.response;
+      console.log("[generate] AI response status retrieved.");
+
       const content = response.text();
-      console.log("[generate] Content length:", content?.length || 0);
+      console.log("[generate] Content successfully extracted. Length:", content?.length || 0);
 
       res.json({ content: content || "" });
-      console.log("[generate] Success response sent.");
+      console.log("[generate] Success response sent for cover letter.");
     } catch (err: any) {
-      console.error("[generate] COVER LETTER GENERATE FAILED:", err);
+      console.error("[generate] COVER LETTER GENERATE FAILED!");
+      console.error("[generate] Error Message:", err?.message);
+      console.error("[generate] Error Stack:", err?.stack);
+
       res.status(500).json({
         message: "Failed to generate cover letter",
         detail: err?.message || String(err),
-        type: err?.name
+        type: err?.name,
+        hint: "Check GOOGLE_GEMINI_API_KEY and model availability."
       });
     }
   });
