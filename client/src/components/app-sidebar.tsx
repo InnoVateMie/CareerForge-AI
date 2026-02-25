@@ -6,7 +6,8 @@ import {
   LayoutDashboard,
   LogOut,
   Sparkles,
-  MessageSquare
+  MessageSquare,
+  X
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
@@ -19,13 +20,15 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarFooter,
-  SidebarHeader
+  SidebarHeader,
+  useSidebar
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
 
 export function AppSidebar() {
   const [location] = useLocation();
   const { logout, user } = useAuth();
+  const { setOpenMobile, isMobile } = useSidebar();
 
   const mainNav = [
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -44,8 +47,8 @@ export function AppSidebar() {
   const userInitial = displayName.charAt(0).toUpperCase();
 
   return (
-    <Sidebar className="border-r border-border/40 bg-sidebar/50 backdrop-blur-xl">
-      <SidebarHeader className="p-6 border-b border-border/10">
+    <Sidebar className="border-r border-border/40 bg-sidebar shadow-2xl">
+      <SidebarHeader className="p-6 border-b border-border/10 flex flex-row items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-3 px-1 hover:opacity-80 transition-all active:scale-95">
           <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary via-primary/90 to-accent flex items-center justify-center shadow-lg shadow-primary/20 ring-1 ring-white/10">
             <Sparkles className="h-5 w-5 text-white" />
@@ -55,6 +58,14 @@ export function AppSidebar() {
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/80">Premium AI</span>
           </div>
         </Link>
+        {isMobile && (
+          <button
+            onClick={() => setOpenMobile(false)}
+            className="h-10 w-10 flex items-center justify-center rounded-xl bg-muted/50 text-muted-foreground hover:text-foreground active:scale-90 transition-all"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
       </SidebarHeader>
 
       <SidebarContent className="px-3 py-6 space-y-2">

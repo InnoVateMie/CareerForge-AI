@@ -1,7 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useAuth } from "@/hooks/use-auth";
-import { Loader2 } from "lucide-react";
+import { Loader2, Menu } from "lucide-react";
 import { Redirect } from "wouter";
 import { ThemeToggle } from "./ThemeToggle";
 import { Clock } from "./Clock";
@@ -37,7 +37,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <div className="flex flex-col flex-1 min-w-0">
           <header className="flex h-16 md:h-20 items-center justify-between px-4 md:px-8 border-b border-border/10 bg-background/40 backdrop-blur-xl z-20 sticky top-0">
             <div className="flex items-center gap-3 md:gap-4 font-display">
-              <SidebarTrigger className="h-10 w-10 text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-300 rounded-xl" />
+              <SidebarTrigger className="h-10 w-10 text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-300 rounded-xl">
+                <Menu className="h-5 w-5" />
+              </SidebarTrigger>
               <div className="h-6 w-[1px] bg-border/20 mx-1 hidden md:block" />
               <div className="flex flex-col md:flex-row md:items-center md:gap-2">
                 <h2 className="text-sm font-bold text-foreground md:text-muted-foreground md:font-medium tracking-tight">CareerForge</h2>
