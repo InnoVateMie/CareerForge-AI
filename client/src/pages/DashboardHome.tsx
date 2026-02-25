@@ -176,7 +176,7 @@ export default function DashboardHome() {
                       </div>
                       <div>
                         <h3 className="font-bold text-foreground text-lg">{resume.title}</h3>
-                        <p className="text-xs text-muted-foreground">Modified {formatDateTime(resume.updatedAt!)}</p>
+                        <p className="text-xs text-muted-foreground">Modified {resume.updatedAt ? formatDateTime(resume.updatedAt) : "Recently"}</p>
                       </div>
                     </div>
                     <Button asChild variant="ghost" size="icon" className="group-hover:text-primary transition-colors">
@@ -216,7 +216,7 @@ export default function DashboardHome() {
                       </div>
                       <div className="text-left">
                         <h3 className="font-bold text-foreground text-lg">{letter.title}</h3>
-                        <p className="text-xs text-muted-foreground">Archived {formatDateTime(letter.updatedAt!)}</p>
+                        <p className="text-xs text-muted-foreground">Modified {letter.updatedAt ? formatDateTime(letter.updatedAt) : "Recently"}</p>
                       </div>
                     </div>
                     <Button asChild variant="ghost" size="icon" className="group-hover:text-accent transition-colors">

@@ -275,9 +275,7 @@ Format the output in CLEAN, SEMANTIC HTML using THESE EXACT CLASSES for a Vibran
       console.log("[generate] AI request sent, waiting for response...");
 
       const response = await result.response;
-      console.log("[generate] AI response status retrieved.");
-
-      const content = response.text();
+      const content = response.text().replace(/```html|```/g, "").trim();
       console.log("[generate] Content successfully extracted. Length:", content?.length || 0);
 
       res.json({ content: content || "" });
@@ -287,9 +285,9 @@ Format the output in CLEAN, SEMANTIC HTML using THESE EXACT CLASSES for a Vibran
       console.error("[generate] Error Message:", err?.message);
 
       res.status(500).json({
-        message: "Failed to generate cover letter",
+        message: "Failed to generate cover letter. This may be due to a timeout or quota issue.",
         detail: err?.message || String(err),
-        hint: "Check GOOGLE_GEMINI_API_KEY."
+        hint: "Try again in a moment or verify your GOOGLE_GEMINI_API_KEY."
       });
     }
   });
@@ -320,9 +318,20 @@ Format the output in CLEAN, SEMANTIC HTML using THESE EXACT CLASSES for a Vibran
 
       const { jsonModel } = getGenAIModels();
       const result = await jsonModel.generateContent(prompt);
-      const content = result.response.text();
-      const parsedResult = JSON.parse(content || '{"analysis": "", "suggestions": ""}');
-      res.json(parsedResult);
+      const rawContent = result.response.text();
+      console.log("[optimize] Raw AI Output:", rawContent);
+
+      try {
+        const cleanJson = rawContent.replace(/```json|```/g, "").trim();
+        const parsedResult = JSON.parse(cleanJson);
+        res.json(parsedResult);
+      } catch (parseErr) {
+        console.error("[optimize] JSON Parse Error:", parseErr);
+        res.json({
+          analysis: "Match analysis completed (parsing error encountered). Please try again.",
+          suggestions: "<ul><li>Refine your input and try again for better results.</li></ul>"
+        });
+      }
     } catch (err: any) {
       console.error("RESUME OPTIMIZE FAILED:", err);
       res.status(500).json({
@@ -418,9 +427,21 @@ Format the output in CLEAN, SEMANTIC HTML using THESE EXACT CLASSES for a Vibran
 
       const { jsonModel } = getGenAIModels();
       const result = await jsonModel.generateContent(prompt);
-      const content = result.response.text();
-      const parsedResult = JSON.parse(content || '{"feedback": "", "score": 0, "improvedAnswer": ""}');
-      res.json(parsedResult);
+      const rawContent = result.response.text();
+      console.log("[evaluate] Raw AI Output:", rawContent);
+
+      try {
+        const cleanJson = rawContent.replace(/```json|```/g, "").trim();
+        const parsedResult = JSON.parse(cleanJson);
+        res.json(parsedResult);
+      } catch (parseErr) {
+        console.error("[evaluate] JSON Parse Error:", parseErr);
+        res.json({
+          feedback: "Thank you for your answer. Our analysis engine encountered a minor formatting issue with the AI's response.",
+          score: 0,
+          improvedAnswer: "Keep your response concise and focused on the STAR method."
+        });
+      }
     } catch (err: any) {
       console.error("INTERVIEW EVALUATE FAILED:", err);
       res.status(500).json({
