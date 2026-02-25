@@ -40,10 +40,20 @@ export default function AuthPage() {
             }
         } catch (error: any) {
             console.error("[auth] Error details:", error);
-            console.error("[auth] Supabase configured:", isSupabaseConfigured);
+
+            let errorMessage = error.message || "An unexpected error occurred.";
+            let errorTitle = "Authentication Error";
+
+            // Specific handling for common Supabase Email Provider limits
+            if (error.message?.includes("Email link is invalid or has expired") ||
+                error.message?.includes("Error sending confirmation mail")) {
+                errorTitle = "Email Verification Limit";
+                errorMessage = "We're having trouble sending your confirmation email. This usually happens when the daily email limit is reached. Please wait a few minutes or contact support.";
+            }
+
             toast({
-                title: "Error",
-                description: error.message || "An unexpected error occurred during authentication.",
+                title: errorTitle,
+                description: errorMessage,
                 variant: "destructive",
             });
         } finally {
@@ -167,6 +177,11 @@ export default function AuthPage() {
                                         </>
                                     )}
                                 </Button>
+                                {!isLogin && (
+                                    <p className="text-[10px] text-center text-slate-500 mt-2 px-4 italic">
+                                        Note: Confirmation email might take a few moments. If it fails, please wait or try again later.
+                                    </p>
+                                )}
                             </form>
 
                             <div className="mt-8 pt-8 border-t border-white/10 text-center">
