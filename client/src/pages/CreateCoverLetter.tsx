@@ -59,18 +59,22 @@ export default function CreateCoverLetter() {
   };
 
   const handleSave = async () => {
+    console.log("[save] handleSave triggered. Title:", title);
     if (!title) {
       toast({ title: "Please enter a title", variant: "destructive" });
       return;
     }
     try {
+      console.log("[save] Sending payload to createMutation...");
       await createMutation.mutateAsync({
         title,
         content: generatedHtml,
       });
+      console.log("[save] Save mutation successful.");
       toast({ title: "Saved successfully!" });
       setLocation("/dashboard/cover-letters");
-    } catch (e) {
+    } catch (e: any) {
+      console.error("[save] Save failed:", e?.message || e);
       toast({ title: "Save failed", variant: "destructive" });
     }
   };

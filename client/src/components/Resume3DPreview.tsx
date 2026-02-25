@@ -1,6 +1,6 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Float, Text, MeshDistortMaterial, PerspectiveCamera } from "@react-three/drei";
-import { useRef } from "react";
+import { OrbitControls, Float, Text, MeshDistortMaterial, PerspectiveCamera, Environment, ContactShadows } from "@react-three/drei";
+import { useRef, Suspense } from "react";
 import * as THREE from "three";
 
 function ResumeSheet() {
@@ -14,35 +14,38 @@ function ResumeSheet() {
     });
 
     return (
-        <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
-            <mesh ref={meshRef}>
+        <Float speed={3} rotationIntensity={0.4} floatIntensity={0.6}>
+            <mesh ref={meshRef} castShadow receiveShadow>
                 <planeGeometry args={[3, 4, 32, 32]} />
                 <MeshDistortMaterial
                     color="#ffffff"
-                    speed={1}
-                    distort={0.1}
+                    speed={2}
+                    distort={0.15}
                     radius={1}
                 />
                 <Text
                     position={[0, 1.2, 0.01]}
-                    fontSize={0.2}
-                    color="#1e293b"
-                    font="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZJhjp-EkNo.woff"
+                    fontSize={0.22}
+                    color="#1e1b4b"
+                    anchorX="center"
+                    anchorY="middle"
                 >
                     CAREER FORGE AI
                 </Text>
                 <Text
-                    position={[-1, 0.8, 0.01]}
-                    fontSize={0.1}
-                    color="#64748b"
-                    maxWidth={2}
+                    position={[-1.2, 0.8, 0.01]}
+                    fontSize={0.12}
+                    color="#4338ca"
+                    maxWidth={2.5}
                     anchorX="left"
+                    anchorY="top"
                 >
-                    Senior Frontend Engineer
+                    Executive Profile
                 </Text>
+                {/* Decorative border */}
                 <mesh position={[0, 0, -0.01]}>
-                    <planeGeometry args={[3.1, 4.1]} />
-                    <meshBasicMaterial color="#3b82f6" transparent opacity={0.1} />
+                    <planeGeometry args={[3.05, 4.05]} />
+                    <meshBasicMaterial color="#4f46e5" transparent opacity={0.3} />
                 </mesh>
             </mesh>
         </Float>
@@ -51,20 +54,43 @@ function ResumeSheet() {
 
 export function Resume3DPreview() {
     return (
-        <div className="h-[300px] w-full rounded-2xl overflow-hidden bg-gradient-to-b from-primary/5 to-accent/5 border border-primary/10 relative">
+        <div className="h-[300px] w-full rounded-2xl overflow-hidden bg-gradient-to-br from-indigo-50/50 via-background to-blue-50/50 border border-primary/10 relative">
             <div className="absolute top-4 left-4 z-10">
-                <h3 className="text-sm font-bold uppercase tracking-widest text-primary">Interactive Preview</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60">Professional Profile Architecture</h3>
             </div>
-            <Canvas shadows>
-                <PerspectiveCamera makeDefault position={[0, 0, 5]} />
-                <ambientLight intensity={0.5} />
-                <pointLight position={[10, 10, 10]} intensity={1} />
-                <spotLight position={[-10, 10, 10]} angle={0.15} penumbra={1} intensity={1} />
-                <ResumeSheet />
-                <OrbitControls enableZoom={false} makeDefault autoRotate autoRotateSpeed={0.5} />
-                {/* @ts-ignore */}
-                <gridHelper args={[20, 20, 0x3b82f6, 0x1e293b]} rotation={[Math.PI / 2, 0, 0]} position={[0, 0, -2]} opacity={0.1} transparent />
-            </Canvas>
+
+            <Suspense fallback={<div className="flex items-center justify-center h-full text-muted-foreground animate-pulse">Initializing Visualization...</div>}>
+                <Canvas shadows dpr={[1, 2]}>
+                    <PerspectiveCamera makeDefault position={[0, 0, 6]} />
+                    <ambientLight intensity={0.8} />
+                    <pointLight position={[10, 10, 10]} intensity={1.5} castShadow />
+                    <spotLight position={[-10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
+
+                    <ResumeSheet />
+
+                    <ContactShadows
+                        position={[0, -2.5, 0]}
+                        opacity={0.4}
+                        scale={10}
+                        blur={2}
+                        far={4.5}
+                    />
+
+                    <Environment preset="city" />
+
+                    <OrbitControls
+                        enableZoom={false}
+                        makeDefault
+                        autoRotate
+                        autoRotateSpeed={0.8}
+                        minPolarAngle={Math.PI / 2.5}
+                        maxPolarAngle={Math.PI / 1.5}
+                    />
+
+                    {/* @ts-ignore */}
+                    <gridHelper args={[20, 20, 0x4338ca, 0xe0e7ff]} rotation={[Math.PI / 2, 0, 0]} position={[0, 0, -2.5]} opacity={0.05} transparent />
+                </Canvas>
+            </Suspense>
         </div>
     );
 }

@@ -245,49 +245,48 @@ REQUIRED HTML STRUCTURE:
   });
 
   app.post(api.coverLetters.generate.path, isAuthenticated, async (req, res) => {
-    console.log("[generate] Cover letter generation requested");
+    console.log("[generate] STAGE: Request Received");
     try {
-      console.log("[generate] Parsing input...");
       const input = api.coverLetters.generate.input.parse(req.body);
-      console.log("[generate] Input parsed for company:", input.companyName);
+      console.log("[generate] STAGE: Input Parsed -", input.companyName);
 
-      const prompt = `Generate a high-end, professional cover letter for the following context:
-Company Name: ${input.companyName}
-Target Job Role: ${input.jobRole}
+      const prompt = `Generate a professional cover letter for ${input.companyName} as a ${input.jobRole}.
 My Skills: ${input.skills}
-My Experience Summary: ${input.experienceSummary}
+Experience: ${input.experienceSummary}
 
-Format the output in CLEAN, SEMANTIC HTML using THESE EXACT CLASSES for a Vibrant Premium look:
-1. Wrap everything in <div class="premium-letter">
-2. Header: <div class="letter-header"><h1>[Full Name]</h1><div class="contact-info"><span>[Email]</span> | <span>[Phone]</span> | <span>[LinkedIn/Portfolio]</span></div></div>
-3. Recipient: <div class="recipient-info"><div class="date">[Current Date]</div><div class="manager">Hiring Manager</div><div class="company">${input.companyName}</div></div>
-4. Subject: <div class="letter-subject">RE: Application for ${input.jobRole} Position</div>
-5. Body: Use <p> tags for paragraphs. Make the tone professional and engaging.
-6. Closing: <div class="closing"><p>Best regards,</p><div class="signature-name">[Full Name]</div></div>
+Output CLEAN, SEMANTIC HTML using these classes:
+1. Wrap in <div class="premium-letter">
+2. Header: <div class="letter-header"><h1>[Full Name]</h1><div class="contact-info"><span>[Email]</span> | <span>[Phone]</span></div></div>
+3. Recipient: <div class="recipient-info"><div class="date">[Date]</div><div class="manager">Hiring Manager</div><div class="company">${input.companyName}</div></div>
+4. Subject: <div class="letter-subject">RE: ${input.jobRole}</div>
+5. Body: Use <p> tags. Professional tone.
+6. Closing: <div class="closing"><p>Best regards,</p><div class="signature-name">[Name]</div></div>
 
-[IMPORTANT]: Use placeholders like [Full Name] if not provided in input, but prioritize a professional look. DO NOT include markdown code block backticks.`;
+[IMPORTANT]: RAW HTML ONLY. No markdown code blocks.`;
 
-      console.log("[generate] Initializing Gemini models...");
+      console.log("[generate] STAGE: Initializing Gemini");
       const { model } = getGenAIModels();
-      console.log("[generate] Gemini model initialized. Calling AI...");
 
+      console.log("[generate] STAGE: Calling AI API...");
       const result = await model.generateContent(prompt);
-      console.log("[generate] AI request sent, waiting for response...");
 
+      console.log("[generate] STAGE: Awaiting Response...");
       const response = await result.response;
-      const content = response.text().replace(/```html|```/g, "").trim();
-      console.log("[generate] Content successfully extracted. Length:", content?.length || 0);
 
+      console.log("[generate] STAGE: Processing Text...");
+      const rawText = response.text();
+      const content = rawText.replace(/```html|```/g, "").trim();
+
+      console.log("[generate] STAGE: Success. Length:", content?.length || 0);
       res.json({ content: content || "" });
-      console.log("[generate] Success response sent for cover letter.");
     } catch (err: any) {
-      console.error("[generate] COVER LETTER GENERATE FAILED!");
-      console.error("[generate] Error Message:", err?.message);
+      console.error("[generate] STAGE: FAILED!");
+      console.error("[generate] Error Details:", err?.message || err);
 
       res.status(500).json({
-        message: "Failed to generate cover letter. This may be due to a timeout or quota issue.",
+        message: "Failed to generate cover letter. This is likely a Netlify timeout or AI quota limit.",
         detail: err?.message || String(err),
-        hint: "Try again in a moment or verify your GOOGLE_GEMINI_API_KEY."
+        stage: "Generation"
       });
     }
   });
