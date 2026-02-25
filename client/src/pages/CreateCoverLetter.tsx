@@ -49,8 +49,8 @@ export default function CreateCoverLetter() {
     try {
       setTitle(`Cover Letter - ${values.companyName}`);
       const result = await generateMutation.mutateAsync(values);
-      const htmlContent = await marked.parse(result.content);
-      setGeneratedHtml(htmlContent);
+      // AI now returns high-fidelity HTML directly. Removing redundant marked.parse.
+      setGeneratedHtml(result.content);
       setStep("edit");
       toast({ title: "Cover letter generated successfully!" });
     } catch (e) {

@@ -5,6 +5,7 @@ import { FileText, Mail, Target, ArrowRight, Sparkles, MessageSquare, TrendingUp
 import { Link } from "wouter";
 import { useResumes } from "@/hooks/use-resumes";
 import { useCoverLetters } from "@/hooks/use-cover-letters";
+import { useAuth } from "@/hooks/use-auth";
 import { Resume3DPreview } from "@/components/Resume3DPreview";
 import { motion } from "framer-motion";
 import { formatDateTime } from "@/lib/utils";
@@ -27,11 +28,20 @@ const item = {
 export default function DashboardHome() {
   const { data: resumes } = useResumes();
   const { data: coverLetters } = useCoverLetters();
+  const { user } = useAuth();
+
+  // Extract username from email (e.g., user@gmail.com -> user)
+  const displayName = user?.email?.split('@')[0] || "Professional";
+
+  // Dynamic Success Rate: 70% baseline + activity boost
+  const resumeCount = resumes?.length || 0;
+  const letterCount = coverLetters?.length || 0;
+  const successRate = Math.min(98, 70 + (resumeCount * 2) + (letterCount * 1));
 
   const stats = [
-    { label: "Resumes Built", value: resumes?.length || 0, icon: FileCheck, color: "text-blue-500" },
-    { label: "Cover Letters", value: coverLetters?.length || 0, icon: Mail, color: "text-rose-500" },
-    { label: "Success Rate", value: "85%", icon: TrendingUp, color: "text-emerald-500" },
+    { label: "Resumes Built", value: resumeCount, icon: FileCheck, color: "text-blue-500" },
+    { label: "Cover Letters", value: letterCount, icon: Mail, color: "text-rose-500" },
+    { label: "Success Rate", value: `${successRate}%`, icon: TrendingUp, color: "text-emerald-500" },
   ];
 
   return (
@@ -46,7 +56,7 @@ export default function DashboardHome() {
         <motion.div variants={item} className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h1 className="text-4xl md:text-5xl font-bold font-display tracking-tight text-foreground">
-              Welcome, <span className="text-gradient">Professional</span>
+              Welcome, <span className="text-gradient capitalize">{displayName}</span>
             </h1>
             <p className="text-muted-foreground mt-3 text-lg font-light max-w-xl">
               Your AI-enhanced career workspace is ready. Design your future today.

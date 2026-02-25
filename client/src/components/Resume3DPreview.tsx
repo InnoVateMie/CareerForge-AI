@@ -61,7 +61,7 @@ export function Resume3DPreview() {
                 <pointLight position={[10, 10, 10]} intensity={1} />
                 <spotLight position={[-10, 10, 10]} angle={0.15} penumbra={1} intensity={1} />
                 <ResumeSheet />
-                <OrbitControls enableZoom={false} makeDefault />
+                <OrbitControls enableZoom={false} makeDefault autoRotate autoRotateSpeed={0.5} />
                 {/* @ts-ignore */}
                 <gridHelper args={[20, 20, 0x3b82f6, 0x1e293b]} rotation={[Math.PI / 2, 0, 0]} position={[0, 0, -2]} opacity={0.1} transparent />
             </Canvas>
