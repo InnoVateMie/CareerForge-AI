@@ -41,14 +41,23 @@ export default function AuthPage() {
                 setLocation("/dashboard");
             } else {
                 // Signup flow with OTP
+                console.log(`[auth] Starting signup for:`, email);
+                
                 const { data, error } = await supabase.auth.signUp({
                     email,
                     password,
                 });
 
-                if (error) throw error;
+                if (error) {
+                    console.error(`[auth] Signup error:`, error);
+                    throw error;
+                }
 
-                console.log(`[auth] Signup response:`, data);
+                console.log(`[auth] Signup response:`, {
+                    user: data.user ? { id: data.user.id, email: data.user.email, email_confirmed_at: data.user.email_confirmed_at } : null,
+                    session: !!data.session,
+                    identities: data.user?.identities?.length || 0
+                });
                 
                 // Check if user was created but needs confirmation
                 if (data.user && data.user.identities && data.user.identities.length === 0) {
@@ -60,27 +69,28 @@ export default function AuthPage() {
                     });
                     setIsLogin(true);
                 } else if (data.user && !data.session) {
-                    // User created but email not confirmed - OTP should be sent
-                    console.log(`[auth] User created, waiting for OTP verification`);
+                    // User created but email not confirmed - show OTP screen
+                    console.log(`[auth] User created, email not confirmed - showing OTP screen`);
                     setStep("otp");
                     toast({
                         title: "Verification code sent!",
                         description: "Please check your email for the 6-digit code.",
                     });
                 } else if (data.session) {
-                    // Auto-confirmed (email confirmation disabled in Supabase)
+                    // Auto-confirmed (shouldn't happen if Confirm email is enabled)
+                    console.warn(`[auth] User auto-confirmed - check Supabase settings`);
                     toast({
                         title: "Account created!",
                         description: "Welcome to CareerForge AI!",
                     });
                     setLocation("/dashboard");
                 } else {
-                    // Fallback - show OTP screen anyway
-                    console.log(`[auth] Unknown state, showing OTP screen`);
+                    // Fallback - show OTP screen
+                    console.log(`[auth] Fallback - showing OTP screen`);
                     setStep("otp");
                     toast({
                         title: "Check your email",
-                        description: "If verification is required, enter the code from your email.",
+                        description: "Please check your email for the verification code.",
                     });
                 }
             }
