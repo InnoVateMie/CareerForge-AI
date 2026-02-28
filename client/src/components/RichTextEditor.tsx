@@ -52,6 +52,29 @@ export function RichTextEditor({ content, onChange, editorRef }: RichTextEditorP
       attributes: {
         class: "premium-resume prose prose-sm md:prose-base dark:prose-invert max-w-none focus:outline-none min-h-[500px] p-8",
       },
+      handleDOMEvents: {
+        copy: (view, event) => {
+          const selection = window.getSelection();
+          if (selection && selection.toString()) {
+            const rawText = selection.toString();
+            // Scatter the text by inserting random "UNLOCK PREMIUM EXPORT" messages and extra newlines
+            const scatteredText = rawText.split('\n').map(line =>
+              line + "\n\n[UNLOCK PREMIUM PDF EXPORT TO REMOVE WATERMARK]\n"
+            ).join('\n---\n');
+
+            event.preventDefault();
+            event.clipboardData?.setData('text/plain', `CareerForge AI Preview - Upgrade for professional export!\n\n${scatteredText}`);
+            event.clipboardData?.setData('text/html', `<div style="color: red; font-weight: bold;">CareerForge AI Preview - Upgrade for professional export!</div><br/>${scatteredText.replace(/\n/g, '<br/>')}`);
+            return true;
+          }
+          return false;
+        },
+        cut: (view, event) => {
+          event.preventDefault();
+          event.clipboardData?.setData('text/plain', "Cutting text is disabled to protect premium document formatting.");
+          return true;
+        }
+      }
     },
   });
 
@@ -238,8 +261,7 @@ export function RichTextEditor({ content, onChange, editorRef }: RichTextEditorP
       <div
         className="flex-1 bg-background"
         ref={editorRef}
-        onCopy={(e) => { e.preventDefault(); }}
-        onCut={(e) => { e.preventDefault(); }}
+        onContextMenu={(e) => { e.preventDefault(); }}
         onDragStart={(e) => { e.preventDefault(); }}
       >
         <EditorContent editor={editor} />
