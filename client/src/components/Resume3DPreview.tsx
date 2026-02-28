@@ -1,5 +1,5 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Float, Text, MeshDistortMaterial, PerspectiveCamera, ContactShadows, HemisphereLight } from "@react-three/drei";
+import { OrbitControls, Float, Text, MeshDistortMaterial, PerspectiveCamera, ContactShadows } from "@react-three/drei";
 import { useRef, Suspense } from "react";
 import * as THREE from "three";
 
@@ -65,7 +65,7 @@ export function Resume3DPreview() {
 
                     {/* Reliable Offline Lighting */}
                     <ambientLight intensity={1.2} />
-                    <hemisphereLight intensity={0.5} strokeColor="#ffffff" groundColor="#4338ca" />
+                    <hemisphereLight intensity={0.5} groundColor="#4338ca" />
                     <pointLight position={[10, 10, 10]} intensity={2} castShadow />
                     <spotLight position={[-10, 10, 10]} angle={0.2} penumbra={1} intensity={1.5} castShadow />
 

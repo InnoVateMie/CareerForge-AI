@@ -2,6 +2,7 @@ import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useResumes } from "@/hooks/use-resumes";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
@@ -19,6 +20,7 @@ export default function LinkedInOptimizer() {
     const { toast } = useToast();
 
     const [selectedResumeId, setSelectedResumeId] = useState<string>("");
+    const [linkedinUrl, setLinkedinUrl] = useState("");
     const [customProfile, setCustomProfile] = useState("");
     const [result, setResult] = useState<LinkedInResponse | null>(null);
     const [isGenerating, setIsGenerating] = useState(false);
@@ -31,14 +33,17 @@ export default function LinkedInOptimizer() {
             if (resume) contentToOptimize = resume.content + "\n" + contentToOptimize;
         }
 
-        if (!contentToOptimize.trim()) {
-            toast({ title: "Please provide a resume or paste some profile content to optimize.", variant: "destructive" });
+        if (!contentToOptimize.trim() && !linkedinUrl.trim()) {
+            toast({ title: "Please provide a resume, a LinkedIn URL, or paste some profile content.", variant: "destructive" });
             return;
         }
 
         setIsGenerating(true);
         try {
-            const res = await apiRequest("POST", api.linkedin.optimizeProfile.path, { profileOrResumeContent: contentToOptimize });
+            const res = await apiRequest("POST", api.linkedin.optimizeProfile.path, {
+                profileOrResumeContent: contentToOptimize,
+                linkedinUrl: linkedinUrl.trim() || undefined
+            });
             const data = await res.json() as LinkedInResponse;
             setResult(data);
             toast({ title: "Successfully optimized profile!" });
@@ -64,7 +69,7 @@ export default function LinkedInOptimizer() {
                     <Card className="border-border shadow-xl h-fit">
                         <CardHeader>
                             <CardTitle>Source Material</CardTitle>
-                            <CardDescription>Select a saved resume or paste your current LinkedIn 'About' section and Experience.</CardDescription>
+                            <CardDescription>Select a saved resume, paste your LinkedIn URL, or paste your text content.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <div className="space-y-2">
@@ -80,6 +85,15 @@ export default function LinkedInOptimizer() {
                                         ))}
                                     </SelectContent>
                                 </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">LinkedIn Profile URL</label>
+                                <Input
+                                    placeholder="https://www.linkedin.com/in/your-profile"
+                                    value={linkedinUrl}
+                                    onChange={e => setLinkedinUrl(e.target.value)}
+                                />
                             </div>
 
                             <div className="space-y-2">

@@ -5,6 +5,34 @@ import { api } from "../shared/routes";
 import { z } from "zod";
 import { isAuthenticated } from "./auth";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+  apiVersion: "2023-10-16" as any,
+});
+
+const PAYPAL_API_BASE = process.env.PAYPAL_ENVIRONMENT === "sandbox"
+  ? "https://api-m.sandbox.paypal.com"
+  : "https://api-m.paypal.com";
+
+async function generatePayPalAccessToken() {
+  const auth = Buffer.from(
+    `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`
+  ).toString("base64");
+
+  const response = await fetch(`${PAYPAL_API_BASE}/v1/oauth2/token`, {
+    method: "POST",
+    body: "grant_type=client_credentials",
+    headers: {
+      Authorization: `Basic ${auth}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error_description || "Failed to generate PayPal token");
+  return data.access_token;
+}
 
 const getGenAIModels = () => {
   const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
@@ -418,18 +446,46 @@ Format as CLEAN HTML with sections:
   app.post(api.linkedin.optimizeProfile.path, isAuthenticated, async (req, res) => {
     try {
       const input = api.linkedin.optimizeProfile.input.parse(req.body);
-      const prompt = `Act as an expert LinkedIn Profile Optimizer and Executive Career Coach. Based on the following resume or profile content, generate a highly engaging, SEO-optimized LinkedIn profile.
+
+      let fetchedContent = "";
+      if (input.linkedinUrl) {
+        try {
+          const response = await fetch(input.linkedinUrl, {
+            headers: {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            }
+          });
+          const text = await response.text();
+          // Just take a chunk of it to avoid token overflow if it's huge, though Gemini Flash can handle a lot.
+          fetchedContent = text.substring(0, 30000);
+        } catch (e) {
+          console.error("Failed to fetch LinkedIn URL", e);
+          fetchedContent = "Failed to fetch directly. URL provided: " + input.linkedinUrl;
+        }
+      }
+
+      const prompt = `Act as an expert LinkedIn Profile Optimizer and Executive Career Coach. Based on the following information, generate a highly engaging, SEO-optimized LinkedIn profile.
       
-      Content: ${input.profileOrResumeContent}
+      IMPORTANT INSTRUCTIONS FOR TONE:
+      - The outcome MUST be highly realistic and human-sounding.
+      - DO NOT use overly complex, bloated, academic, or robotic jargon.
+      - DO NOT include unnecessary information. Focus only on the core value.
+      - Make it sound like a real, approachable professional wrote it.
+      
+      Provided Resume/Profile Text: 
+      ${input.profileOrResumeContent || 'None'}
+      
+      LinkedIn URL or Scraped Data:
+      ${fetchedContent || input.linkedinUrl || 'None'}
       
       Output in JSON format exactly like this:
       {
-        "headline": "A punchy, keyword-rich headline (under 220 characters).",
-        "summary": "An engaging, story-driven 'About' section that highlights impact and skills.",
+        "headline": "A punchy, human-sounding keyword-rich headline (under 220 characters).",
+        "summary": "An engaging, story-driven 'About' section that is highly realistic, not robotic.",
         "experienceSuggestions": [
-          "Suggestion 1 for improving experience bullet points",
-          "Suggestion 2",
-          "Suggestion 3"
+          "Practical, simple suggestion 1",
+          "Practical, simple suggestion 2",
+          "Practical, simple suggestion 3"
         ]
       }`;
 
@@ -528,6 +584,103 @@ Format as CLEAN HTML with sections:
         message: "Failed to evaluate answer",
         detail: err?.message || String(err)
       });
+    }
+  });
+
+  // Payments
+  app.post(api.payments.createStripeIntent.path, isAuthenticated, async (req, res) => {
+    try {
+      if (!process.env.STRIPE_SECRET_KEY) {
+        throw new Error("Stripe secret key not configured");
+      }
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: 500, // $5.00
+        currency: "usd",
+        metadata: { userId: getUserId(req) },
+      });
+      res.json({ clientSecret: paymentIntent.client_secret! });
+    } catch (err: any) {
+      console.error("Stripe Intent Error:", err);
+      res.status(500).json({ message: "Failed to create payment intent", detail: err.message });
+    }
+  });
+
+  app.post(api.payments.verifyStripePayment.path, isAuthenticated, async (req, res) => {
+    try {
+      const { paymentIntentId } = api.payments.verifyStripePayment.input.parse(req.body);
+      const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+      if (intent.status === "succeeded" && intent.metadata.userId === getUserId(req)) {
+        await storage.updateUserPremiumStatus(getUserId(req), true);
+        res.json({ success: true });
+      } else {
+        res.status(400).json({ message: "Payment not successful or user mismatch" });
+      }
+    } catch (err: any) {
+      res.status(500).json({ message: "Payment verification failed", detail: err.message });
+    }
+  });
+
+  app.post(api.payments.createPaypalOrder.path, isAuthenticated, async (req, res) => {
+    try {
+      if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) {
+        throw new Error("PayPal keys not configured");
+      }
+      const accessToken = await generatePayPalAccessToken();
+      const response = await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          intent: "CAPTURE",
+          purchase_units: [
+            {
+              amount: {
+                currency_code: "USD",
+                value: "5.00",
+              },
+              custom_id: getUserId(req),
+            },
+          ],
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Failed to create order");
+      res.json({ orderID: data.id });
+    } catch (err: any) {
+      console.error("PayPal Order Error:", err);
+      res.status(500).json({ message: "PayPal Order Error", detail: err.message });
+    }
+  });
+
+  app.post(api.payments.capturePaypalOrder.path, isAuthenticated, async (req, res) => {
+    try {
+      const { orderID } = api.payments.capturePaypalOrder.input.parse(req.body);
+      const accessToken = await generatePayPalAccessToken();
+      const response = await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders/${orderID}/capture`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Capture failed");
+
+      const purchaseUnit = data.purchase_units?.[0];
+      if (data.status === "COMPLETED" && purchaseUnit?.custom_id === getUserId(req)) {
+        await storage.updateUserPremiumStatus(getUserId(req), true);
+        res.json({ success: true });
+      } else {
+        res.status(400).json({ message: "Payment not completed or user mismatch" });
+      }
+    } catch (err: any) {
+      console.error("PayPal Capture Error:", err);
+      res.status(500).json({ message: "PayPal Capture Error", detail: err.message });
     }
   });
 

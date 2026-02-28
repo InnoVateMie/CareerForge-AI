@@ -27,6 +27,7 @@ export function useAuth() {
     user,
     isLoading,
     isAuthenticated: !!user,
+    hasPremiumExport: user?.user_metadata?.hasPremiumExport || false,
     logout: logoutMutation.mutate,
     isLoggingOut: logoutMutation.isPending,
   };

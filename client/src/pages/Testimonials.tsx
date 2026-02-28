@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { Star, Quote, Sparkles, ArrowLeft } from "lucide-react";
-import { ThreeBackground } from "@/components/ThreeBackground";
 import { Link } from "wouter";
 
 const fadeUp = {
@@ -67,7 +66,7 @@ const testimonials = [
 export default function Testimonials() {
     return (
         <div className="dark min-h-screen bg-[#0A0B10] text-slate-200 relative overflow-hidden font-sans">
-            <ThreeBackground />
+
 
             {/* Nav */}
             <header className="relative z-20 w-full px-6 py-4 flex items-center justify-between max-w-7xl mx-auto">

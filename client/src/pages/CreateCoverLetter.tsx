@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useGenerateCoverLetter, useCreateCoverLetter } from "@/hooks/use-cover-letters";
+import { useAuth } from "@/hooks/use-auth";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -31,7 +32,7 @@ export default function CreateCoverLetter() {
   const letterEditorRef = useRef<HTMLDivElement>(null);
 
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [hasPremiumExport, setHasPremiumExport] = useState(false);
+  const { hasPremiumExport } = useAuth();
 
   const generateMutation = useGenerateCoverLetter();
   const createMutation = useCreateCoverLetter();
@@ -207,19 +208,8 @@ export default function CreateCoverLetter() {
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
         onSuccess={() => {
-          setHasPremiumExport(true);
-          setTimeout(() => {
-            if (letterEditorRef.current) {
-              const opt = {
-                margin: 20,
-                filename: `${title || "cover-letter"}.pdf`,
-                image: { type: "jpeg", quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-              };
-              html2pdf().set(opt).from(letterEditorRef.current).save();
-            }
-          }, 500);
+          // On success, reload to fetch the new JWT that contains the hasPremiumExport flag
+          window.location.reload();
         }}
       />
     </DashboardLayout>

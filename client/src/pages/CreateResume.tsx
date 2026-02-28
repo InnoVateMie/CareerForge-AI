@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useGenerateResume, useCreateResume } from "@/hooks/use-resumes";
+import { useAuth } from "@/hooks/use-auth";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -99,7 +100,7 @@ export default function CreateResume() {
   const resumeEditorRef = useRef<any>(null);
 
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [hasPremiumExport, setHasPremiumExport] = useState(false);
+  const { hasPremiumExport } = useAuth();
 
   const generateMutation = useGenerateResume();
   const createMutation = useCreateResume();
@@ -543,19 +544,9 @@ export default function CreateResume() {
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
         onSuccess={() => {
-          setHasPremiumExport(true);
-          setTimeout(() => {
-            if (resumeEditorRef.current) {
-              const opt = {
-                margin: 10,
-                filename: `${resumeTitle || 'resume'}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-              };
-              html2pdf().set(opt).from(resumeEditorRef.current).save();
-            }
-          }, 500);
+          // Since it's global now, we trigger a page reload or let react-query refetch the user object.
+          // The modal verified it backend, so a window reload here is simplest to fetch the new token.
+          window.location.reload();
         }}
       />
     </DashboardLayout>

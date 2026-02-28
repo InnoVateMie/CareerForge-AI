@@ -8,6 +8,7 @@ import {
   type CoverLetter
 } from "../shared/schema";
 import { eq, and } from "drizzle-orm";
+import { users } from "../shared/models/auth";
 
 export interface IStorage {
   getResumes(userId: string): Promise<Resume[]>;
@@ -21,6 +22,8 @@ export interface IStorage {
   createCoverLetter(userId: string, coverLetter: InsertCoverLetter): Promise<CoverLetter>;
   updateCoverLetter(id: number, userId: string, updates: Partial<InsertCoverLetter>): Promise<CoverLetter>;
   deleteCoverLetter(id: number, userId: string): Promise<void>;
+
+  updateUserPremiumStatus(userId: string, hasPremiumExport: boolean): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -78,6 +81,10 @@ export class DatabaseStorage implements IStorage {
 
   async deleteCoverLetter(id: number, userId: string): Promise<void> {
     await db!.delete(coverLetters).where(and(eq(coverLetters.id, id), eq(coverLetters.userId, userId)));
+  }
+
+  async updateUserPremiumStatus(userId: string, hasPremiumExport: boolean): Promise<void> {
+    await db!.update(users).set({ hasPremiumExport }).where(eq(users.id, userId));
   }
 }
 

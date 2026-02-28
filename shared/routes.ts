@@ -241,7 +241,8 @@ export const api = {
       method: "POST" as const,
       path: "/api/linkedin/optimize" as const,
       input: z.object({
-        profileOrResumeContent: z.string(),
+        profileOrResumeContent: z.string().optional(),
+        linkedinUrl: z.string().optional(),
       }),
       responses: {
         200: z.object({
@@ -252,6 +253,48 @@ export const api = {
         500: errorSchemas.internal,
         401: errorSchemas.unauthorized,
       },
+    }
+  },
+  payments: {
+    createStripeIntent: {
+      method: "POST" as const,
+      path: "/api/payments/stripe/create-intent" as const,
+      input: z.object({}),
+      responses: {
+        200: z.object({ clientSecret: z.string() }),
+        500: errorSchemas.internal,
+        401: errorSchemas.unauthorized
+      }
+    },
+    verifyStripePayment: {
+      method: "POST" as const,
+      path: "/api/payments/stripe/verify" as const,
+      input: z.object({ paymentIntentId: z.string() }),
+      responses: {
+        200: z.object({ success: z.boolean() }),
+        500: errorSchemas.internal,
+        401: errorSchemas.unauthorized
+      }
+    },
+    createPaypalOrder: {
+      method: "POST" as const,
+      path: "/api/payments/paypal/create-order" as const,
+      input: z.object({}),
+      responses: {
+        200: z.object({ orderID: z.string() }),
+        500: errorSchemas.internal,
+        401: errorSchemas.unauthorized
+      }
+    },
+    capturePaypalOrder: {
+      method: "POST" as const,
+      path: "/api/payments/paypal/capture-order" as const,
+      input: z.object({ orderID: z.string() }),
+      responses: {
+        200: z.object({ success: z.boolean() }),
+        500: errorSchemas.internal,
+        401: errorSchemas.unauthorized
+      }
     }
   }
 };

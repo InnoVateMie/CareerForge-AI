@@ -56,15 +56,11 @@ export function RichTextEditor({ content, onChange, editorRef }: RichTextEditorP
         copy: (view, event) => {
           const selection = window.getSelection();
           if (selection && selection.toString()) {
-            const rawText = selection.toString();
-            // Scatter the text by inserting random "UNLOCK PREMIUM EXPORT" messages and extra newlines
-            const scatteredText = rawText.split('\n').map(line =>
-              line + "\n\n[UNLOCK PREMIUM PDF EXPORT TO REMOVE WATERMARK]\n"
-            ).join('\n---\n');
-
             event.preventDefault();
-            event.clipboardData?.setData('text/plain', `CareerForge AI Preview - Upgrade for professional export!\n\n${scatteredText}`);
-            event.clipboardData?.setData('text/html', `<div style="color: red; font-weight: bold;">CareerForge AI Preview - Upgrade for professional export!</div><br/>${scatteredText.replace(/\n/g, '<br/>')}`);
+            const message = "Please use the 'Export PDF' button to download your document. Copying text directly is disabled to protect premium formatting.";
+
+            event.clipboardData?.setData('text/plain', message);
+            event.clipboardData?.setData('text/html', `<div style="color: red; font-weight: bold; font-family: sans-serif; padding: 20px; border: 2px dashed red; text-align: center;">${message}</div>`);
             return true;
           }
           return false;
