@@ -59,7 +59,7 @@ export default function AuthPage() {
                     identities: data.user?.identities?.length || 0
                 });
                 
-                // Check if user was created but needs confirmation
+                // Check signup result
                 if (data.user && data.user.identities && data.user.identities.length === 0) {
                     // User already exists
                     toast({
@@ -68,30 +68,21 @@ export default function AuthPage() {
                         variant: "destructive",
                     });
                     setIsLogin(true);
-                } else if (data.user && !data.session) {
-                    // User created but email not confirmed - show OTP screen
-                    console.log(`[auth] User created, email not confirmed - showing OTP screen`);
+                } else if (data.session) {
+                    // User created and auto-confirmed (email confirmation disabled)
+                    console.log(`[auth] User registered successfully`);
+                    toast({
+                        title: "Account created!",
+                        description: "Welcome to CareerForge AI!",
+                    });
+                    setLocation("/dashboard");
+                } else {
+                    // Email confirmation required - show OTP screen
+                    console.log(`[auth] Email confirmation required - showing OTP screen`);
                     setStep("otp");
                     toast({
                         title: "Verification code sent!",
                         description: "Please check your email for the 6-digit code.",
-                    });
-                } else if (data.session) {
-                    // Auto-confirmed - this shouldn't happen if Confirm email is enabled
-                    // Log out the user and force them to go through proper flow
-                    console.warn(`[auth] User auto-confirmed - logging out to enforce OTP`);
-                    await supabase.auth.signOut();
-                    toast({
-                        title: "Configuration Error",
-                        description: "Email verification is not properly configured. Please contact support.",
-                        variant: "destructive",
-                    });
-                } else {
-                    // Unknown state
-                    toast({
-                        title: "Registration error",
-                        description: "Please try again or contact support.",
-                        variant: "destructive",
                     });
                 }
             }
