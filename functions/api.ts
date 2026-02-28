@@ -1,43 +1,67 @@
-// Simple health check endpoint that doesn't require full app initialization
-export const handler = async (event: any, context: any) => {
-    // Log environment info for debugging
-    console.log("[api] Function invoked", {
-        path: event.path,
-        httpMethod: event.httpMethod,
-        hasDatabaseUrl: !!process.env.DATABASE_URL,
-        hasGeminiKey: !!process.env.GOOGLE_GEMINI_API_KEY,
-        nodeEnv: process.env.NODE_ENV
-    });
+import serverless from "serverless-http";
+import { createApp } from "../server/app";
 
-    // Health check endpoint
-    if (event.path === "/api" || event.path === "/api/" || event.path === "/api/health") {
+// Cache the handler for better performance
+let cachedHandler: ReturnType<typeof serverless> | null = null;
+let initError: Error | null = null;
+
+const initHandler = async () => {
+    if (cachedHandler) return cachedHandler;
+    if (initError) throw initError;
+    
+    try {
+        console.log("[api] Initializing app...");
+        const app = await createApp();
+        cachedHandler = serverless(app);
+        console.log("[api] App initialized successfully");
+        return cachedHandler;
+    } catch (err) {
+        console.error("[api] Failed to initialize app:", err);
+        initError = err as Error;
+        throw err;
+    }
+};
+
+// Pre-initialize
+const initPromise = initHandler().catch(() => null);
+
+export const handler = async (event: any, context: any) => {
+    // Log all requests
+    console.log("[api] Request:", event.httpMethod, event.path);
+    
+    try {
+        // Wait for initialization
+        await initPromise;
+        
+        if (!cachedHandler) {
+            throw initError || new Error("Handler not initialized");
+        }
+        
+        // Process the request
+        const result = await cachedHandler(event, context) as any;
+        console.log("[api] Response:", result?.statusCode);
+        return result;
+        
+    } catch (err: any) {
+        console.error("[api] Error:", err);
+        
+        // Return detailed error for debugging
         return {
-            statusCode: 200,
+            statusCode: 500,
             body: JSON.stringify({
-                status: "alive",
-                message: "CareerForge-AI API is running (diagnostic mode)",
+                error: "Internal Server Error",
+                message: err?.message || "Unknown error",
+                stack: err?.stack,
                 env: {
                     hasDatabaseUrl: !!process.env.DATABASE_URL,
                     hasGeminiKey: !!process.env.GOOGLE_GEMINI_API_KEY,
                     nodeEnv: process.env.NODE_ENV
                 }
             }),
-            headers: { "Content-Type": "application/json" }
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*"
+            }
         };
     }
-
-    // For all other routes, return diagnostic info
-    return {
-        statusCode: 503,
-        body: JSON.stringify({
-            error: "Service Temporarily Unavailable",
-            message: "API is in diagnostic mode. Full service coming soon.",
-            path: event.path,
-            env: {
-                hasDatabaseUrl: !!process.env.DATABASE_URL,
-                hasGeminiKey: !!process.env.GOOGLE_GEMINI_API_KEY
-            }
-        }),
-        headers: { "Content-Type": "application/json" }
-    };
 };
