@@ -1,41 +1,43 @@
-import serverless from "serverless-http";
-import { createApp } from "../server/app";
-
-// Initialize handler immediately for better cold start performance
-let cachedHandler: ReturnType<typeof serverless> | null = null;
-
-const initHandler = async () => {
-    if (!cachedHandler) {
-        try {
-            const app = await createApp();
-            cachedHandler = serverless(app);
-        } catch (err) {
-            console.error("[api] Failed to initialize app:", err);
-            throw err;
-        }
-    }
-    return cachedHandler;
-};
-
-// Pre-initialize on module load
-const initPromise = initHandler();
-
+// Simple health check endpoint that doesn't require full app initialization
 export const handler = async (event: any, context: any) => {
-    try {
-        const handler = await initPromise;
-        return await handler(event, context);
-    } catch (err: any) {
-        console.error("[api] Handler error:", err);
+    // Log environment info for debugging
+    console.log("[api] Function invoked", {
+        path: event.path,
+        httpMethod: event.httpMethod,
+        hasDatabaseUrl: !!process.env.DATABASE_URL,
+        hasGeminiKey: !!process.env.GOOGLE_GEMINI_API_KEY,
+        nodeEnv: process.env.NODE_ENV
+    });
+
+    // Health check endpoint
+    if (event.path === "/api" || event.path === "/api/" || event.path === "/api/health") {
         return {
-            statusCode: 500,
-            body: JSON.stringify({ 
-                error: "Internal Server Error", 
-                message: err?.message || "Unknown error",
-                stack: process.env.NODE_ENV === "development" ? err?.stack : undefined
+            statusCode: 200,
+            body: JSON.stringify({
+                status: "alive",
+                message: "CareerForge-AI API is running (diagnostic mode)",
+                env: {
+                    hasDatabaseUrl: !!process.env.DATABASE_URL,
+                    hasGeminiKey: !!process.env.GOOGLE_GEMINI_API_KEY,
+                    nodeEnv: process.env.NODE_ENV
+                }
             }),
-            headers: {
-                "Content-Type": "application/json"
-            }
+            headers: { "Content-Type": "application/json" }
         };
     }
+
+    // For all other routes, return diagnostic info
+    return {
+        statusCode: 503,
+        body: JSON.stringify({
+            error: "Service Temporarily Unavailable",
+            message: "API is in diagnostic mode. Full service coming soon.",
+            path: event.path,
+            env: {
+                hasDatabaseUrl: !!process.env.DATABASE_URL,
+                hasGeminiKey: !!process.env.GOOGLE_GEMINI_API_KEY
+            }
+        }),
+        headers: { "Content-Type": "application/json" }
+    };
 };
