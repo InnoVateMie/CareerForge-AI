@@ -1,5 +1,5 @@
 import serverless from "serverless-http";
-import { createApp } from "../server/app";
+import { createApp } from "../../server/app";
 
 // Initialize handler immediately for better cold start performance
 let cachedHandler: ReturnType<typeof serverless> | null = null;

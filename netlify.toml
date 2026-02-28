@@ -1,7 +1,11 @@
 [build]
   command = "npm run build"
   publish = "dist/public"
-  functions = "functions"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["@google/generative-ai", "pg", "stripe", "drizzle-orm", "drizzle-zod", "zod"]
 
 [[redirects]]
   from = "/api/*"
