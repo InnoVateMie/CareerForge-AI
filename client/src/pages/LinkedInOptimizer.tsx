@@ -20,7 +20,6 @@ export default function LinkedInOptimizer() {
     const { toast } = useToast();
 
     const [selectedResumeId, setSelectedResumeId] = useState<string>("");
-    const [linkedinUrl, setLinkedinUrl] = useState("");
     const [customProfile, setCustomProfile] = useState("");
     const [result, setResult] = useState<LinkedInResponse | null>(null);
     const [isGenerating, setIsGenerating] = useState(false);
@@ -33,16 +32,15 @@ export default function LinkedInOptimizer() {
             if (resume) contentToOptimize = resume.content + "\n" + contentToOptimize;
         }
 
-        if (!contentToOptimize.trim() && !linkedinUrl.trim()) {
-            toast({ title: "Please provide a resume, a LinkedIn URL, or paste some profile content.", variant: "destructive" });
+        if (!contentToOptimize.trim()) {
+            toast({ title: "Please select a resume or paste your profile content.", variant: "destructive" });
             return;
         }
 
         setIsGenerating(true);
         try {
             const res = await apiRequest("POST", api.linkedin.optimizeProfile.path, {
-                profileOrResumeContent: contentToOptimize,
-                linkedinUrl: linkedinUrl.trim() || undefined
+                profileOrResumeContent: contentToOptimize
             });
             const data = await res.json() as LinkedInResponse;
             setResult(data);
@@ -85,15 +83,6 @@ export default function LinkedInOptimizer() {
                                         ))}
                                     </SelectContent>
                                 </Select>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">LinkedIn Profile URL</label>
-                                <Input
-                                    placeholder="https://www.linkedin.com/in/your-profile"
-                                    value={linkedinUrl}
-                                    onChange={e => setLinkedinUrl(e.target.value)}
-                                />
                             </div>
 
                             <div className="space-y-2">
