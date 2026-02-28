@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import {
   Sparkles, FileText, Layout, TrendingUp, Zap, Shield, Check, ArrowRight
 } from "lucide-react";
-import { ThreeBackground } from "@/components/ThreeBackground";
 import { Button3D } from "@/components/Button3D";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
@@ -62,8 +61,6 @@ export default function Landing() {
 
   return (
     <div className="dark min-h-screen bg-[#0A0B10] text-slate-200 relative overflow-hidden font-sans">
-      <ThreeBackground />
-
       {/* ─── NAV ─── */}
       <header className="relative z-20 w-full px-6 py-4 flex items-center justify-between max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
@@ -77,7 +74,7 @@ export default function Landing() {
         <nav className="hidden md:flex items-center gap-8">
           <a href="#features" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Features</a>
           <Link href="/testimonials"><span className="text-sm font-medium text-slate-400 hover:text-white transition-colors cursor-pointer">Testimonials</span></Link>
-          <Link href="/pricing"><span className="text-sm font-medium text-slate-400 hover:text-white transition-colors cursor-pointer">Pricing</span></Link>
+
         </nav>
         <Button
           onClick={() => window.location.href = "/auth"}
@@ -114,7 +111,7 @@ export default function Landing() {
 
             {/* Trust bar */}
             <div className="flex flex-wrap items-center justify-center gap-6 mt-12 mb-4 text-xs text-slate-500">
-              {["10,000+ Professionals", "500+ Companies Hired", "4.9★ Average Rating", "No Credit Card Required"].map((t) => (
+              {["10,000+ Professionals", "500+ Companies Hired", "4.9★ Average Rating"].map((t) => (
                 <span key={t} className="flex items-center gap-1.5">
                   <Check className="w-3.5 h-3.5 text-primary" /> {t}
                 </span>
@@ -158,17 +155,7 @@ export default function Landing() {
             ))}
           </motion.div>
 
-          {/* CTA beneath features */}
-          <motion.div
-            custom={1} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}
-            className="text-center mt-16"
-          >
-            <Link href="/pricing">
-              <button className="px-8 py-4 rounded-full bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-semibold text-sm border border-white/10 transition-all flex items-center gap-2 mx-auto">
-                Compare Plans & Pricing <ArrowRight className="w-4 h-4" />
-              </button>
-            </Link>
-          </motion.div>
+
         </section>
       </main>
 
@@ -192,7 +179,7 @@ export default function Landing() {
             <h4 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Product</h4>
             <ul className="space-y-4">
               <li><a href="#features" className="text-slate-500 hover:text-primary transition-colors text-sm">Features</a></li>
-              <li><Link href="/pricing"><span className="text-slate-500 hover:text-primary transition-colors text-sm cursor-pointer">Pricing</span></Link></li>
+
               <li><Link href="/testimonials"><span className="text-slate-500 hover:text-primary transition-colors text-sm cursor-pointer">Testimonials</span></Link></li>
             </ul>
           </div>

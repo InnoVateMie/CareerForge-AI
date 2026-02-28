@@ -16,7 +16,8 @@ import JobOptimizer from "./pages/JobOptimizer";
 import InterviewCoach from "./pages/InterviewCoach";
 import EditResume from "./pages/EditResume";
 import Testimonials from "./pages/Testimonials";
-import Pricing from "./pages/Pricing";
+import LinkedInOptimizer from "./pages/LinkedInOptimizer";
+
 import NotFound from "./pages/not-found";
 
 function Router() {
@@ -24,7 +25,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Landing} />
       <Route path="/testimonials" component={Testimonials} />
-      <Route path="/pricing" component={Pricing} />
+
       <Route path="/auth" component={AuthPage} />
       <Route path="/dashboard" component={DashboardHome} />
 
@@ -42,6 +43,9 @@ function Router() {
 
       {/* Interview Coach */}
       <Route path="/dashboard/interview" component={InterviewCoach} />
+
+      {/* LinkedIn Optimizer */}
+      <Route path="/dashboard/linkedin" component={LinkedInOptimizer} />
 
       <Route component={NotFound} />
     </Switch>

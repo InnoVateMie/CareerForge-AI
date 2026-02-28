@@ -235,6 +235,24 @@ export const api = {
         401: errorSchemas.unauthorized,
       },
     }
+  },
+  linkedin: {
+    optimizeProfile: {
+      method: "POST" as const,
+      path: "/api/linkedin/optimize" as const,
+      input: z.object({
+        profileOrResumeContent: z.string(),
+      }),
+      responses: {
+        200: z.object({
+          headline: z.string(),
+          summary: z.string(),
+          experienceSuggestions: z.array(z.string()),
+        }),
+        500: errorSchemas.internal,
+        401: errorSchemas.unauthorized,
+      },
+    }
   }
 };
 

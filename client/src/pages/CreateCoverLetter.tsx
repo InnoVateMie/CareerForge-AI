@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Loader2, Mail, Download, Save, ArrowLeft } from "lucide-react";
 import { RichTextEditor } from "@/components/RichTextEditor";
+import { ExportPaymentModal } from "@/components/ExportPaymentModal";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 // @ts-ignore
@@ -28,6 +29,9 @@ export default function CreateCoverLetter() {
   const [generatedHtml, setGeneratedHtml] = useState("");
   const [title, setTitle] = useState("");
   const letterEditorRef = useRef<HTMLDivElement>(null);
+
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [hasPremiumExport, setHasPremiumExport] = useState(false);
 
   const generateMutation = useGenerateCoverLetter();
   const createMutation = useCreateCoverLetter();
@@ -71,6 +75,11 @@ export default function CreateCoverLetter() {
   };
 
   const handleExportPDF = () => {
+    if (!hasPremiumExport) {
+      setIsPaymentModalOpen(true);
+      return;
+    }
+
     if (!letterEditorRef.current) return;
     const opt = {
       margin: 20,
@@ -193,6 +202,26 @@ export default function CreateCoverLetter() {
           </>
         )}
       </div>
+
+      <ExportPaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        onSuccess={() => {
+          setHasPremiumExport(true);
+          setTimeout(() => {
+            if (letterEditorRef.current) {
+              const opt = {
+                margin: 20,
+                filename: `${title || "cover-letter"}.pdf`,
+                image: { type: "jpeg", quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+              };
+              html2pdf().set(opt).from(letterEditorRef.current).save();
+            }
+          }, 500);
+        }}
+      />
     </DashboardLayout>
   );
 }

@@ -415,11 +415,47 @@ Format as CLEAN HTML with sections:
     }
   });
 
+  app.post(api.linkedin.optimizeProfile.path, isAuthenticated, async (req, res) => {
+    try {
+      const input = api.linkedin.optimizeProfile.input.parse(req.body);
+      const prompt = `Act as an expert LinkedIn Profile Optimizer and Executive Career Coach. Based on the following resume or profile content, generate a highly engaging, SEO-optimized LinkedIn profile.
+      
+      Content: ${input.profileOrResumeContent}
+      
+      Output in JSON format exactly like this:
+      {
+        "headline": "A punchy, keyword-rich headline (under 220 characters).",
+        "summary": "An engaging, story-driven 'About' section that highlights impact and skills.",
+        "experienceSuggestions": [
+          "Suggestion 1 for improving experience bullet points",
+          "Suggestion 2",
+          "Suggestion 3"
+        ]
+      }`;
+
+      const { jsonModel } = getGenAIModels();
+      const result = await jsonModel.generateContent(prompt);
+      const rawContent = result.response.text();
+
+      try {
+        const cleanJson = rawContent.replace(/```json|```/g, "").trim();
+        const parsedResult = JSON.parse(cleanJson);
+        res.json(parsedResult);
+      } catch (parseErr) {
+        res.status(500).json({
+          message: "Failed to parse JSON response",
+        });
+      }
+    } catch (err: any) {
+      res.status(500).json({ message: "Failed to optimize LinkedIn profile", detail: err?.message || String(err) });
+    }
+  });
+
   app.post(api.interview.generateQuestions.path, isAuthenticated, async (req, res) => {
     try {
       const input = api.interview.generateQuestions.input.parse(req.body);
 
-      const prompt = `Act as a Senior Hiring Manager for a top-tier tech company. Based on the following resume and job description, generate 5 challenging, behavioral and technical interview questions that test for depth and cultural fit.
+      const prompt = `Act as a Hiring Manager. Based on the following resume and job description, generate 5 realistic, human-level, conversational interview questions. The questions should be practical, straightforward, and focused on genuine experience rather than being overly hard, complex, or academic.
       
       Resume: ${input.resumeContent}
       Job Description: ${input.jobDescription}

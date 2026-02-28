@@ -7,7 +7,8 @@ import {
   LogOut,
   Sparkles,
   MessageSquare,
-  X
+  X,
+  Linkedin
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
@@ -41,6 +42,7 @@ export function AppSidebar() {
     { title: "Create Cover Letter", url: "/dashboard/cover-letters/new", icon: Briefcase },
     { title: "Job Optimizer", url: "/dashboard/optimize", icon: Target },
     { title: "Interview Coach", url: "/dashboard/interview", icon: MessageSquare },
+    { title: "LinkedIn Optimizer", url: "/dashboard/linkedin", icon: Linkedin },
   ];
 
   const displayName = user?.user_metadata?.full_name || user?.user_metadata?.first_name || user?.email?.split('@')[0] || "User";

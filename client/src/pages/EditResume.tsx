@@ -3,6 +3,7 @@ import { useRoute, useLocation } from "wouter";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useResume, useUpdateResume } from "@/hooks/use-resumes";
 import { RichTextEditor } from "@/components/RichTextEditor";
+import { ExportPaymentModal } from "@/components/ExportPaymentModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Save, Download, FileText, ArrowLeft } from "lucide-react";
@@ -33,6 +34,9 @@ export default function EditResume() {
     const [currentTheme, setCurrentTheme] = useState(RESUME_THEMES[0]);
     const resumeEditorRef = useRef<any>(null);
 
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+    const [hasPremiumExport, setHasPremiumExport] = useState(false);
+
     useEffect(() => {
         if (resume) {
             setContent(resume.content);
@@ -58,6 +62,11 @@ export default function EditResume() {
     };
 
     const handleExportPDF = () => {
+        if (!hasPremiumExport) {
+            setIsPaymentModalOpen(true);
+            return;
+        }
+
         if (!resumeEditorRef.current) return;
         const element = resumeEditorRef.current;
         const opt = {
@@ -152,6 +161,26 @@ export default function EditResume() {
                         </div>
                     )}
                 </div>
+
+                <ExportPaymentModal
+                    isOpen={isPaymentModalOpen}
+                    onClose={() => setIsPaymentModalOpen(false)}
+                    onSuccess={() => {
+                        setHasPremiumExport(true);
+                        setTimeout(() => {
+                            if (resumeEditorRef.current) {
+                                const opt = {
+                                    margin: 10,
+                                    filename: `${title || 'resume'}.pdf`,
+                                    image: { type: 'jpeg', quality: 0.98 },
+                                    html2canvas: { scale: 2, useCORS: true },
+                                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                                };
+                                html2pdf().set(opt).from(resumeEditorRef.current).save();
+                            }
+                        }, 500);
+                    }}
+                />
             </div>
         </DashboardLayout>
     );

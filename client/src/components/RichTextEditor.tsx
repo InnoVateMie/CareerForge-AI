@@ -235,7 +235,13 @@ export function RichTextEditor({ content, onChange, editorRef }: RichTextEditorP
         </div>
       </div>
 
-      <div className="flex-1 bg-background" ref={editorRef}>
+      <div
+        className="flex-1 bg-background"
+        ref={editorRef}
+        onCopy={(e) => { e.preventDefault(); }}
+        onCut={(e) => { e.preventDefault(); }}
+        onDragStart={(e) => { e.preventDefault(); }}
+      >
         <EditorContent editor={editor} />
       </div>
     </div>

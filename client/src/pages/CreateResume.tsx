@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Wand2, Download, Save, FileText, Plus, Trash2, ArrowLeft } from "lucide-react";
 import { RichTextEditor } from "@/components/RichTextEditor";
+import { ExportPaymentModal } from "@/components/ExportPaymentModal";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { marked } from "marked";
@@ -97,6 +98,9 @@ export default function CreateResume() {
   const [currentTheme, setCurrentTheme] = useState(RESUME_THEMES[0]);
   const resumeEditorRef = useRef<any>(null);
 
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [hasPremiumExport, setHasPremiumExport] = useState(false);
+
   const generateMutation = useGenerateResume();
   const createMutation = useCreateResume();
   const { toast } = useToast();
@@ -172,6 +176,11 @@ export default function CreateResume() {
   };
 
   const handleExportPDF = () => {
+    if (!hasPremiumExport) {
+      setIsPaymentModalOpen(true);
+      return;
+    }
+
     if (!resumeEditorRef.current) return;
     const element = resumeEditorRef.current;
     const opt = {
@@ -529,6 +538,26 @@ export default function CreateResume() {
           </>
         )}
       </div>
+
+      <ExportPaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        onSuccess={() => {
+          setHasPremiumExport(true);
+          setTimeout(() => {
+            if (resumeEditorRef.current) {
+              const opt = {
+                margin: 10,
+                filename: `${resumeTitle || 'resume'}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+              };
+              html2pdf().set(opt).from(resumeEditorRef.current).save();
+            }
+          }, 500);
+        }}
+      />
     </DashboardLayout>
   );
 }
