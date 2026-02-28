@@ -5,11 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Sparkles, Loader2, ArrowLeft, Mail, Lock, UserPlus, LogIn } from "lucide-react";
+import { Sparkles, Loader2, ArrowLeft, Mail, Lock, UserPlus, LogIn, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AuthVisual } from "@/components/AuthVisual";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { AlertCircle } from "lucide-react";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+
+type AuthStep = "form" | "otp" | "success";
 
 export default function AuthPage() {
     const [, setLocation] = useLocation();
@@ -18,31 +21,43 @@ export default function AuthPage() {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [step, setStep] = useState<AuthStep>("form");
+    const [otp, setOtp] = useState("");
 
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         try {
-            const { data, error } = isLogin
-                ? await supabase.auth.signInWithPassword({ email, password })
-                : await supabase.auth.signUp({ email, password });
+            if (isLogin) {
+                // Login flow - direct access
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) throw error;
 
-            if (error) throw error;
-
-            console.log(`[auth] ${isLogin ? 'Login' : 'Signup'} successful`);
-
-            // If we have a session (instant signup or login), go to dashboard
-            if (data?.session) {
+                console.log(`[auth] Login successful`);
                 toast({
-                    title: isLogin ? "Welcome back!" : "Account created!",
-                    description: isLogin ? "Accessing your workspace..." : "Starting your career journey...",
+                    title: "Welcome back!",
+                    description: "Accessing your workspace...",
                 });
                 setLocation("/dashboard");
-            } else if (!isLogin) {
-                // If no session but signup was successful, confirmation is required
+            } else {
+                // Signup flow with OTP
+                const { data, error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        emailRedirectTo: `${window.location.origin}/auth`,
+                    }
+                });
+
+                if (error) throw error;
+
+                console.log(`[auth] Signup initiated, OTP sent`);
+                
+                // Move to OTP verification step
+                setStep("otp");
                 toast({
-                    title: "Registration successful!",
-                    description: "Please check your email to confirm your account before logging in.",
+                    title: "Verification code sent!",
+                    description: "Please check your email for the 6-digit code.",
                 });
             }
         } catch (error: any) {
@@ -51,16 +66,82 @@ export default function AuthPage() {
             let errorMessage = error.message || "An unexpected error occurred.";
             let errorTitle = "Authentication Error";
 
-            // Specific handling for common Supabase Email Provider limits
-            if (error.message?.includes("Email link is invalid or has expired") ||
-                error.message?.includes("Error sending confirmation mail")) {
-                errorTitle = "Email Verification Limit";
-                errorMessage = "We're having trouble sending your confirmation email. This usually happens when the daily email limit is reached. Please wait a few minutes or contact support.";
-            }
-
             toast({
                 title: errorTitle,
                 description: errorMessage,
+                variant: "destructive",
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleVerifyOTP = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (otp.length !== 6) {
+            toast({
+                title: "Invalid code",
+                description: "Please enter all 6 digits.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setLoading(true);
+        try {
+            // Verify the OTP
+            const { data, error } = await supabase.auth.verifyOtp({
+                email,
+                token: otp,
+                type: "signup",
+            });
+
+            if (error) throw error;
+
+            console.log(`[auth] OTP verified successfully`);
+            
+            // Show success message
+            setStep("success");
+            toast({
+                title: "Registration successful!",
+                description: "Your account has been verified.",
+            });
+
+            // Auto-login after 2 seconds
+            setTimeout(() => {
+                setLocation("/dashboard");
+            }, 2000);
+
+        } catch (error: any) {
+            console.error("[auth] OTP verification error:", error);
+            toast({
+                title: "Verification failed",
+                description: error.message || "Invalid code. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleResendOTP = async () => {
+        setLoading(true);
+        try {
+            const { error } = await supabase.auth.resend({
+                type: "signup",
+                email,
+            });
+
+            if (error) throw error;
+
+            toast({
+                title: "Code resent!",
+                description: "Please check your email for the new code.",
+            });
+        } catch (error: any) {
+            toast({
+                title: "Failed to resend",
+                description: error.message,
                 variant: "destructive",
             });
         } finally {
@@ -111,10 +192,14 @@ export default function AuthPage() {
 
                             <div className="mb-8">
                                 <h1 className="text-3xl font-bold text-white mb-2 font-display">
-                                    {isLogin ? "Welcome Back" : "Create Account"}
+                                    {step === "otp" ? "Verify Your Email" : step === "success" ? "Welcome Aboard!" : isLogin ? "Welcome Back" : "Create Account"}
                                 </h1>
                                 <p className="text-slate-400">
-                                    {isLogin
+                                    {step === "otp"
+                                        ? `Enter the 6-digit code sent to ${email}`
+                                        : step === "success"
+                                        ? "Your account has been verified successfully."
+                                        : isLogin
                                         ? "Enter your credentials to access your workshop."
                                         : "Join the thousands forging their future today."}
                                 </p>
@@ -130,78 +215,170 @@ export default function AuthPage() {
                                 </div>
                             )}
 
-                            <form onSubmit={handleAuth} className="space-y-5">
-                                <div className="space-y-2">
-                                    <Label htmlFor="email" className="text-slate-300 text-sm font-medium">Email Address</Label>
-                                    <div className="relative">
-                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                                        <Input
-                                            id="email"
-                                            type="email"
-                                            required
-                                            autoComplete="email"
-                                            placeholder="name@example.com"
-                                            className="bg-white/5 border-white/10 text-white pl-10 h-12 focus:ring-primary/50 focus:border-primary/50 rounded-xl transition-all"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="password" className="text-slate-300 text-sm font-medium">Password</Label>
-                                    <div className="relative">
-                                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                                        <Input
-                                            id="password"
-                                            type="password"
-                                            required
-                                            autoComplete={isLogin ? "current-password" : "new-password"}
-                                            className="bg-white/5 border-white/10 text-white pl-10 h-12 focus:ring-primary/50 focus:border-primary/50 rounded-xl transition-all"
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-
-                                {isLogin && (
-                                    <div className="text-right">
-                                        <a href="#" className="text-xs text-primary hover:text-primary-foreground transition-colors">Forgot password?</a>
-                                    </div>
-                                )}
-
-                                <Button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 group transition-all"
-                                >
-                                    {loading ? (
-                                        <Loader2 className="h-5 w-5 animate-spin" />
-                                    ) : (
-                                        <>
-                                            {isLogin ? <LogIn className="w-5 h-5" /> : <UserPlus className="w-5 h-5" />}
-                                            <span>{isLogin ? "Sign In" : "Register Now"}</span>
-                                        </>
-                                    )}
-                                </Button>
-                                {!isLogin && (
-                                    <p className="text-[10px] text-center text-slate-500 mt-2 px-4 italic">
-                                        Note: Confirmation email might take a few moments. If it fails, please wait or try again later.
-                                    </p>
-                                )}
-                            </form>
-
-                            <div className="mt-8 pt-8 border-t border-white/10 text-center">
-                                <p className="text-slate-400 text-sm">
-                                    {isLogin ? "Don't have an account?" : "Already a member?"}{" "}
-                                    <button
-                                        onClick={() => setIsLogin(!isLogin)}
-                                        className="text-primary font-bold hover:underline"
+                            <AnimatePresence mode="wait">
+                                {step === "form" && (
+                                    <motion.form
+                                        key="form"
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -20 }}
+                                        onSubmit={handleAuth}
+                                        className="space-y-5"
                                     >
-                                        {isLogin ? "Sign Up Free" : "Log In Here"}
-                                    </button>
-                                </p>
-                            </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="email" className="text-slate-300 text-sm font-medium">Email Address</Label>
+                                            <div className="relative">
+                                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                                <Input
+                                                    id="email"
+                                                    type="email"
+                                                    required
+                                                    autoComplete="email"
+                                                    placeholder="name@example.com"
+                                                    className="bg-white/5 border-white/10 text-white pl-10 h-12 focus:ring-primary/50 focus:border-primary/50 rounded-xl transition-all"
+                                                    value={email}
+                                                    onChange={(e) => setEmail(e.target.value)}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label htmlFor="password" className="text-slate-300 text-sm font-medium">Password</Label>
+                                            <div className="relative">
+                                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                                <Input
+                                                    id="password"
+                                                    type="password"
+                                                    required
+                                                    autoComplete={isLogin ? "current-password" : "new-password"}
+                                                    className="bg-white/5 border-white/10 text-white pl-10 h-12 focus:ring-primary/50 focus:border-primary/50 rounded-xl transition-all"
+                                                    value={password}
+                                                    onChange={(e) => setPassword(e.target.value)}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {isLogin && (
+                                            <div className="text-right">
+                                                <a href="#" className="text-xs text-primary hover:text-primary-foreground transition-colors">Forgot password?</a>
+                                            </div>
+                                        )}
+
+                                        <Button
+                                            type="submit"
+                                            disabled={loading}
+                                            className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 group transition-all"
+                                        >
+                                            {loading ? (
+                                                <Loader2 className="h-5 w-5 animate-spin" />
+                                            ) : (
+                                                <>
+                                                    {isLogin ? <LogIn className="w-5 h-5" /> : <UserPlus className="w-5 h-5" />}
+                                                    <span>{isLogin ? "Sign In" : "Register Now"}</span>
+                                                </>
+                                            )}
+                                        </Button>
+                                    </motion.form>
+                                )}
+
+                                {step === "otp" && (
+                                    <motion.form
+                                        key="otp"
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -20 }}
+                                        onSubmit={handleVerifyOTP}
+                                        className="space-y-6"
+                                    >
+                                        <div className="flex justify-center">
+                                            <InputOTP
+                                                maxLength={6}
+                                                value={otp}
+                                                onChange={setOtp}
+                                                render={({ slots }) => (
+                                                    <InputOTPGroup className="gap-2">
+                                                        {slots.map((slot, index) => (
+                                                            <InputOTPSlot
+                                                                key={index}
+                                                                index={index}
+                                                                className="h-12 w-12 bg-white/5 border-white/10 text-white text-lg rounded-lg"
+                                                            />
+                                                        ))}
+                                                    </InputOTPGroup>
+                                                )}
+                                            />
+                                        </div>
+
+                                        <Button
+                                            type="submit"
+                                            disabled={loading || otp.length !== 6}
+                                            className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 group transition-all"
+                                        >
+                                            {loading ? (
+                                                <Loader2 className="h-5 w-5 animate-spin" />
+                                            ) : (
+                                                <>
+                                                    <CheckCircle2 className="w-5 h-5" />
+                                                    <span>Verify Code</span>
+                                                </>
+                                            )}
+                                        </Button>
+
+                                        <div className="text-center">
+                                            <button
+                                                type="button"
+                                                onClick={handleResendOTP}
+                                                disabled={loading}
+                                                className="text-sm text-primary hover:text-primary-foreground transition-colors disabled:opacity-50"
+                                            >
+                                                Didn't receive it? Resend code
+                                            </button>
+                                        </div>
+
+                                        <div className="text-center">
+                                            <button
+                                                type="button"
+                                                onClick={() => setStep("form")}
+                                                className="text-sm text-slate-500 hover:text-slate-300 transition-colors"
+                                            >
+                                                Go back
+                                            </button>
+                                        </div>
+                                    </motion.form>
+                                )}
+
+                                {step === "success" && (
+                                    <motion.div
+                                        key="success"
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className="text-center space-y-6 py-8"
+                                    >
+                                        <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
+                                            <CheckCircle2 className="w-10 h-10 text-green-500" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-bold text-white mb-2">Registration Complete!</h3>
+                                            <p className="text-slate-400">Redirecting you to your dashboard...</p>
+                                        </div>
+                                        <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            {step === "form" && (
+                                <div className="mt-8 pt-8 border-t border-white/10 text-center">
+                                    <p className="text-slate-400 text-sm">
+                                        {isLogin ? "Don't have an account?" : "Already a member?"}{" "}
+                                        <button
+                                            onClick={() => setIsLogin(!isLogin)}
+                                            className="text-primary font-bold hover:underline"
+                                        >
+                                            {isLogin ? "Sign Up Free" : "Log In Here"}
+                                        </button>
+                                    </p>
+                                </div>
+                            )}
                         </motion.div>
 
                         <Button
