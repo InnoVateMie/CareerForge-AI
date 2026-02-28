@@ -59,22 +59,39 @@ export default function AuthPage() {
                     identities: data.user?.identities?.length || 0
                 });
                 
-                // Check if user already exists
+                // Check if user was created but needs confirmation
                 if (data.user && data.user.identities && data.user.identities.length === 0) {
+                    // User already exists
                     toast({
                         title: "Account already exists",
                         description: "Please log in instead.",
                         variant: "destructive",
                     });
                     setIsLogin(true);
-                } else {
-                    // Always show OTP screen for signup (even if Supabase auto-confirms)
-                    // This ensures consistent UX and allows OTP verification
-                    console.log(`[auth] Showing OTP verification screen`);
+                } else if (data.user && !data.session) {
+                    // User created but email not confirmed - show OTP screen
+                    console.log(`[auth] User created, email not confirmed - showing OTP screen`);
                     setStep("otp");
                     toast({
                         title: "Verification code sent!",
                         description: "Please check your email for the 6-digit code.",
+                    });
+                } else if (data.session) {
+                    // Auto-confirmed - this shouldn't happen if Confirm email is enabled
+                    // Log out the user and force them to go through proper flow
+                    console.warn(`[auth] User auto-confirmed - logging out to enforce OTP`);
+                    await supabase.auth.signOut();
+                    toast({
+                        title: "Configuration Error",
+                        description: "Email verification is not properly configured. Please contact support.",
+                        variant: "destructive",
+                    });
+                } else {
+                    // Unknown state
+                    toast({
+                        title: "Registration error",
+                        description: "Please try again or contact support.",
+                        variant: "destructive",
                     });
                 }
             }
