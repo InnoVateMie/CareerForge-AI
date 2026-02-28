@@ -316,23 +316,34 @@ export default function AuthPage() {
                                         onSubmit={handleVerifyOTP}
                                         className="space-y-6"
                                     >
-                                        <div className="flex justify-center">
-                                            <InputOTP
-                                                maxLength={6}
-                                                value={otp}
-                                                onChange={setOtp}
-                                                render={({ slots }) => (
-                                                    <InputOTPGroup className="gap-2">
-                                                        {slots.map((slot, index) => (
-                                                            <InputOTPSlot
-                                                                key={index}
-                                                                index={index}
-                                                                className="h-12 w-12 bg-white/5 border-white/10 text-white text-lg rounded-lg"
-                                                            />
-                                                        ))}
-                                                    </InputOTPGroup>
-                                                )}
-                                            />
+                                        <div className="flex justify-center gap-2">
+                                            {[0, 1, 2, 3, 4, 5].map((index) => (
+                                                <Input
+                                                    key={index}
+                                                    type="text"
+                                                    maxLength={1}
+                                                    value={otp[index] || ""}
+                                                    onChange={(e) => {
+                                                        const newOtp = otp.split("");
+                                                        newOtp[index] = e.target.value;
+                                                        setOtp(newOtp.join(""));
+                                                        // Auto-focus next input
+                                                        if (e.target.value && index < 5) {
+                                                            const nextInput = document.getElementById(`otp-${index + 1}`);
+                                                            nextInput?.focus();
+                                                        }
+                                                    }}
+                                                    onKeyDown={(e) => {
+                                                        // Handle backspace
+                                                        if (e.key === "Backspace" && !otp[index] && index > 0) {
+                                                            const prevInput = document.getElementById(`otp-${index - 1}`);
+                                                            prevInput?.focus();
+                                                        }
+                                                    }}
+                                                    id={`otp-${index}`}
+                                                    className="h-12 w-12 bg-white/5 border-white/10 text-white text-lg text-center rounded-lg focus:ring-primary/50 focus:border-primary/50"
+                                                />
+                                            ))}
                                         </div>
 
                                         <Button
