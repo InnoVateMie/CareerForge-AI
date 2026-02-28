@@ -7,9 +7,18 @@ import { isAuthenticated } from "./auth";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2023-10-16" as any,
-});
+// Lazy initialization of Stripe - only create when needed
+let stripe: Stripe | null = null;
+const getStripe = () => {
+  if (!stripe) {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) {
+      throw new Error("STRIPE_SECRET_KEY not configured");
+    }
+    stripe = new Stripe(key, { apiVersion: "2023-10-16" as any });
+  }
+  return stripe;
+};
 
 const PAYPAL_API_BASE = process.env.PAYPAL_ENVIRONMENT === "sandbox"
   ? "https://api-m.sandbox.paypal.com"
@@ -590,10 +599,7 @@ Format as CLEAN HTML with sections:
   // Payments
   app.post(api.payments.createStripeIntent.path, isAuthenticated, async (req, res) => {
     try {
-      if (!process.env.STRIPE_SECRET_KEY) {
-        throw new Error("Stripe secret key not configured");
-      }
-      const paymentIntent = await stripe.paymentIntents.create({
+      const paymentIntent = await getStripe().paymentIntents.create({
         amount: 500, // $5.00
         currency: "usd",
         metadata: { userId: getUserId(req) },
@@ -608,7 +614,7 @@ Format as CLEAN HTML with sections:
   app.post(api.payments.verifyStripePayment.path, isAuthenticated, async (req, res) => {
     try {
       const { paymentIntentId } = api.payments.verifyStripePayment.input.parse(req.body);
-      const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      const intent = await getStripe().paymentIntents.retrieve(paymentIntentId);
 
       if (intent.status === "succeeded" && intent.metadata.userId === getUserId(req)) {
         await storage.updateUserPremiumStatus(getUserId(req), true);
