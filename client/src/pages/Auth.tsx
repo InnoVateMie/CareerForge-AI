@@ -44,21 +44,45 @@ export default function AuthPage() {
                 const { data, error } = await supabase.auth.signUp({
                     email,
                     password,
-                    options: {
-                        emailRedirectTo: `${window.location.origin}/auth`,
-                    }
                 });
 
                 if (error) throw error;
 
-                console.log(`[auth] Signup initiated, OTP sent`);
+                console.log(`[auth] Signup response:`, data);
                 
-                // Move to OTP verification step
-                setStep("otp");
-                toast({
-                    title: "Verification code sent!",
-                    description: "Please check your email for the 6-digit code.",
-                });
+                // Check if user was created but needs confirmation
+                if (data.user && data.user.identities && data.user.identities.length === 0) {
+                    // User already exists
+                    toast({
+                        title: "Account already exists",
+                        description: "Please log in instead.",
+                        variant: "destructive",
+                    });
+                    setIsLogin(true);
+                } else if (data.user && !data.session) {
+                    // User created but email not confirmed - OTP should be sent
+                    console.log(`[auth] User created, waiting for OTP verification`);
+                    setStep("otp");
+                    toast({
+                        title: "Verification code sent!",
+                        description: "Please check your email for the 6-digit code.",
+                    });
+                } else if (data.session) {
+                    // Auto-confirmed (email confirmation disabled in Supabase)
+                    toast({
+                        title: "Account created!",
+                        description: "Welcome to CareerForge AI!",
+                    });
+                    setLocation("/dashboard");
+                } else {
+                    // Fallback - show OTP screen anyway
+                    console.log(`[auth] Unknown state, showing OTP screen`);
+                    setStep("otp");
+                    toast({
+                        title: "Check your email",
+                        description: "If verification is required, enter the code from your email.",
+                    });
+                }
             }
         } catch (error: any) {
             console.error("[auth] Error details:", error);
